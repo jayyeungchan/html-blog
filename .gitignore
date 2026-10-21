@@ -1,0 +1,12 @@
+node_modules/
+.DS_Store
+Thumbs.db
+*.log
+.env
+.env.local
+
+# WorkBuddy 本地数据（项目记忆等），不入库
+.workbuddy-ai/
+
+# Serena 的 cache/ 与 project.local.yml 由 .serena/.gitignore 忽略；
+# project.yml 与 memories/ 保留入库，换机或协作时可直接复用项目知识。

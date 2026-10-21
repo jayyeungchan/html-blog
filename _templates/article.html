@@ -1,0 +1,74 @@
+<!doctype html>
+<!--
+  ┌──────────────────────────────────────────────────────────────┐
+  │  新文章模板                                                   │
+  │  1. 复制这个文件到某个分类目录，例如 技术/我的新文章.html        │
+  │  2. 改下面 4 个 meta：title / description / date / tags       │
+  │  3. 在 <article class="prose"> 里写正文，h2、h3 会自动进目录   │
+  │  4. git push，网站自动更新                                    │
+  │  文件名建议用中文短句，会作为标题与链接地址                     │
+  └──────────────────────────────────────────────────────────────┘
+-->
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>文章标题 · 字里行间</title>
+  <meta name="description" content="一句话摘要，会显示在首页列表和搜索结果里。" />
+  <meta name="date" content="2026-10-21" />
+  <meta name="tags" content="标签一,标签二" />
+  <link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="/assets/css/site.css" />
+  <script src="/assets/js/theme.js"></script>
+</head>
+<body class="article-page">
+  <div class="progress" id="progress"></div>
+
+  <header class="site-header">
+    <div class="wrap header-inner" id="site-header"></div>
+  </header>
+
+  <main class="wrap article-shell">
+    <div class="article-main">
+      <header class="article-head">
+        <nav class="crumbs" id="crumbs" aria-label="面包屑"></nav>
+        <h1 class="article-title">文章标题</h1>
+        <p class="article-sub" id="article-sub"></p>
+        <div class="article-meta" id="article-meta"></div>
+      </header>
+
+      <article class="prose">
+        <p>开头一段，说明这篇要讲什么。</p>
+
+        <h2>第一个小节</h2>
+        <p>正文。支持 <strong>加粗</strong>、<em>斜体</em>、<a href="/">链接</a> 和 <code>行内代码</code>。</p>
+
+        <blockquote>
+          <p>引用一段话。</p>
+        </blockquote>
+
+        <h2>第二个小节</h2>
+        <ul>
+          <li>列表项一</li>
+          <li>列表项二</li>
+        </ul>
+
+        <pre><code>console.log('代码块');</code></pre>
+      </article>
+
+      <nav class="post-nav" id="post-nav" aria-label="相邻文章"></nav>
+    </div>
+
+    <aside class="toc" id="toc" aria-label="目录"></aside>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <span>© 2026 Kit · 用 HTML 与一点耐心写成</span>
+      <span class="footer-mono">STATIC · RENDER · GITHUB</span>
+    </div>
+  </footer>
+
+  <script src="/assets/js/article.js" defer></script>
+</body>
+</html>

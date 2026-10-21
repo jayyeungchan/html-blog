@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>字里行间 · 目录即分类的静态博客</title>
+  <meta name="description" content="一个用 HTML 写成的博客。目录即分类，文件即文章。" />
+  <meta name="theme-color" content="#faf8f4" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="字里行间" />
+  <meta property="og:description" content="一个用 HTML 写成的博客。目录即分类，文件即文章。" />
+  <link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="/assets/css/site.css" />
+  <script src="/assets/js/theme.js"></script>
+</head>
+<body class="home">
+  <a class="skip-link" href="#articles">跳到文章列表</a>
+
+  <header class="site-header">
+    <div class="wrap header-inner" id="site-header">
+      <a class="brand" href="/">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span data-site-title>字里行间</span>
+      </a>
+      <div class="header-actions">
+        <button class="icon-btn" data-theme-toggle aria-label="切换深浅色模式" title="切换深浅色模式">
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg>
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M19.1 4.9l-1.4 1.4M6.3 17.7l-1.4 1.4"/></svg>
+        </button>
+        <a class="ghost-btn" href="#articles">全部文章</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero wrap">
+      <p class="hero-eyebrow">Index · 目录即分类</p>
+      <h1 data-site-title>字里行间</h1>
+      <p data-site-desc>一个用 HTML 写成的博客。目录即分类，文件即文章。</p>
+      <div class="hero-meta" id="hero-meta"></div>
+    </section>
+
+    <section class="wrap" aria-labelledby="cat-title">
+      <div class="section-head">
+        <h2 id="cat-title">分类</h2>
+        <span>按目录自动生成</span>
+      </div>
+      <div class="cat-grid" id="cat-grid"></div>
+    </section>
+
+    <section class="wrap" id="articles" aria-labelledby="list-title">
+      <div class="section-head">
+        <h2 id="list-title">文章</h2>
+        <span id="list-count">—</span>
+      </div>
+
+      <div class="toolbar">
+        <div class="search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <input id="q" type="search" placeholder="搜索标题、摘要或标签…" autocomplete="off" aria-label="搜索文章" />
+          <kbd>⌘K</kbd>
+        </div>
+        <div class="chips" id="chips" role="group" aria-label="按分类筛选"></div>
+      </div>
+
+      <div id="post-list" class="post-list"></div>
+      <div id="empty" class="empty" hidden>
+        <strong>没有匹配的文章</strong>
+        换个关键词，或者看看别的分类。
+        <button id="reset-filter">清除筛选</button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <span>© <span id="year">2026</span> <span data-site-author>Kit</span> · 用 HTML 与一点耐心写成</span>
+      <span class="footer-mono">STATIC · RENDER · GITHUB</span>
+    </div>
+  </footer>
+
+  <script src="/assets/js/home.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+{
+  "title": "字里行间",
+  "description": "一个用 HTML 写成的博客。目录即分类，文件即文章。",
+  "author": "Kit",
+  "url": "https://your-blog.onrender.com",
+  "contentRoot": ".",
+  "exclude": [
+    "index.html",
+    "404.html",
+    "assets",
+    "_templates"
+  ],
+  "github": {
+    "enabled": false,
+    "owner": "",
+    "repo": "",
+    "branch": "main"
+  }
+}
