@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>oxlint 规则地图</title>
+<style>
+  :root{
+    --bg:#FBFAF7; --surface:#fff; --line:#E7E4DB; --line-soft:#F0EEE7;
+    --ink:#1F1F1D; --muted:#6B6A65; --faint:#96958F;
+    --accent:#185FA5; --accent-bg:#E6F1FB; --accent-ink:#0C447C;
+    --warn:#854F0B; --warn-bg:#FAEEDA; --ok:#0F6E56; --ok-bg:#E1F5EE;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    font-size:14px; line-height:1.6; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1000px; margin:0 auto; padding:44px 24px 80px}
+  header{margin-bottom:28px}
+  h1{font-size:24px; font-weight:600; margin:0 0 8px; letter-spacing:-.01em}
+  .lede{color:var(--muted); margin:0; max-width:660px}
+  .lede b{color:var(--ink); font-weight:600}
+  .kpis{display:flex; gap:26px; margin-top:18px; flex-wrap:wrap}
+  .kpi .v{font-size:22px; font-weight:600; line-height:1.2}
+  .kpi .k{font-size:12px; color:var(--faint)}
+
+  .cats{display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:10px; margin:26px 0 22px}
+  .cat{
+    text-align:left; background:var(--surface); border:1px solid var(--line);
+    border-radius:12px; padding:13px 14px; cursor:pointer; font:inherit; color:inherit;
+    transition:border-color .12s, background .12s;
+  }
+  .cat:hover{border-color:#CFCBC0}
+  .cat[aria-pressed="true"]{border-color:var(--accent); background:var(--accent-bg)}
+  .cat .ct{display:flex; align-items:baseline; justify-content:space-between; gap:8px; margin-bottom:4px}
+  .cat .cn{font-weight:600; font-size:14px}
+  .cat .cd{font-size:11.5px; color:var(--faint); font-variant-numeric:tabular-nums}
+  .cat .cx{font-size:12px; color:var(--muted); line-height:1.5}
+  .cat[aria-pressed="true"] .cx{color:var(--accent-ink)}
+
+  .toolbar{
+    position:sticky; top:0; z-index:5; background:var(--bg);
+    padding:12px 0; border-bottom:1px solid var(--line); margin-bottom:8px;
+    display:flex; gap:14px; align-items:center; flex-wrap:wrap;
+  }
+  #q{
+    flex:1 1 260px; min-width:200px; padding:9px 12px; font:inherit; font-size:13.5px;
+    border:1px solid var(--line); border-radius:9px; background:var(--surface); color:var(--ink);
+  }
+  #q:focus{outline:2px solid var(--accent-bg); border-color:var(--accent)}
+  .tg{display:inline-flex; align-items:center; gap:6px; font-size:13px; color:var(--muted); cursor:pointer; user-select:none}
+  .tg input{accent-color:var(--accent); margin:0; width:14px; height:14px}
+  #count{font-size:12.5px; color:var(--faint); margin-left:auto; font-variant-numeric:tabular-nums}
+
+  .scene{margin:26px 0 4px}
+  .scene h2{font-size:15px; font-weight:600; margin:0 0 2px; display:flex; align-items:center; gap:8px}
+  .scene h2 .n{font-size:11.5px; font-weight:400; color:var(--faint)}
+  .scene p{margin:0; font-size:12.5px; color:#7C7B75; margin-bottom:6px}
+
+  .row{padding:11px 0; border-bottom:1px solid var(--line-soft)}
+  .row:last-child{border-bottom:none}
+  .zh{font-size:13.8px; margin-bottom:3px}
+  .meta{display:flex; align-items:center; gap:7px; flex-wrap:wrap; font-size:11.5px; color:var(--faint)}
+  .meta code{font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,monospace; font-size:12px; color:var(--muted)}
+  .chip{font-size:10.5px; padding:1px 6px; border-radius:999px; border:1px solid var(--line); color:var(--faint)}
+  .chip.def{border-color:#B5D4F4; background:var(--accent-bg); color:var(--accent-ink)}
+  .chip.fix{border-color:#9FE1CB; background:var(--ok-bg); color:var(--ok)}
+  .raw .zh{font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,monospace; font-size:12.5px; color:var(--muted)}
+  .ex{
+    margin:8px 0 2px; padding:9px 11px; background:#F7F5F0;
+    border:1px solid var(--line-soft); border-radius:7px; overflow-x:auto;
+    font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,monospace;
+    font-size:12px; line-height:1.7; color:#3A3A36; white-space:pre; margin-bottom:0;
+  }
+  .ex .bad{color:#A32D2D}
+  .empty{padding:40px 0; color:var(--faint); text-align:center}
+  footer{margin-top:44px; padding-top:18px; border-top:1px solid var(--line); font-size:12px; color:var(--faint)}
+  footer code{font-family:ui-monospace,Menlo,monospace; background:var(--surface); padding:1px 5px; border-radius:4px; border:1px solid var(--line)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>oxlint 规则地图</h1>
+    <p class="lede">官方统计 871 条规则，去掉同名不同插件的重复实现后是 <b>808</b> 个唯一规则名；其中默认只有 <b>111 条</b>在跑。这 111 条每条都配了<b>中文说明 + 一段反例代码</b>，按「它在防什么事故」分成 12 组。可以直接搜「未使用」「promise」「赋值」这类词。</p>
+    <div class="kpis">
+      <div class="kpi"><div class="v">808</div><div class="k">唯一规则名</div></div>
+      <div class="kpi"><div class="v">111</div><div class="k">默认开启</div></div>
+      <div class="kpi"><div class="v">7</div><div class="k">类别</div></div>
+      <div class="kpi"><div class="v">1.89.0</div><div class="k">实测版本</div></div>
+    </div>
+  </header>
+
+  <section class="cats" id="cats"></section>
+
+  <div class="toolbar">
+    <input id="q" type="search" placeholder="搜中文说明或规则名，例如：未使用 / promise / no-unused">
+    <label class="tg"><input type="checkbox" id="onlyDefault" checked> 只看默认开启</label>
+    <label class="tg"><input type="checkbox" id="onlyFix"> 只看可自动修复</label>
+    <label class="tg"><input type="checkbox" id="showEx" checked> 显示反例</label>
+    <span id="count"></span>
+  </div>
+
+  <main id="list"></main>
+
+  <footer>
+    数据来自 <code>npx oxlint --rules</code> 的真实输出解析（871 行），已按规则名去重为 808 条。中文说明与反例代码为人工撰写，覆盖全部 111 条默认开启规则；其余 697 条只有规则名，需要时用 <code>npx oxlint --rules</code> 查。
+    <br>官方规则文档：<code>oxc.rs/docs/guide/usage/linter/rules</code>
+  </footer>
+</div>
+
+<script>
+const RAW = "constructor-super~eslint~cor~1~0;for-direction~eslint~cor~1~1;getter-return~eslint~cor~1~0;no-async-promise-executor~eslint~cor~1~0;no-caller~eslint~cor~1~0;no-class-assign~eslint~cor~1~0;no-compare-neg-zero~eslint~cor~1~1;no-cond-assign~eslint~cor~1~0;no-const-assign~eslint~cor~1~0;no-constant-binary-expression~eslint~cor~1~0;no-constant-condition~eslint~cor~1~0;no-control-regex~eslint~cor~1~0;no-debugger~eslint~cor~1~0;no-delete-var~eslint~cor~1~0;no-dupe-class-members~eslint~cor~1~0;no-dupe-else-if~eslint~cor~1~0;no-dupe-keys~eslint~cor~1~0;no-duplicate-case~eslint~cor~1~0;no-empty-character-class~eslint~cor~1~0;no-empty-pattern~eslint~cor~1~0;no-empty-static-block~eslint~cor~1~0;no-eval~eslint~cor~1~0;no-ex-assign~eslint~cor~1~0;no-extra-boolean-cast~eslint~cor~1~1;no-func-assign~eslint~cor~1~0;no-global-assign~eslint~cor~1~0;no-import-assign~eslint~cor~1~0;no-invalid-regexp~eslint~cor~1~0;no-irregular-whitespace~eslint~cor~1~0;no-iterator~eslint~cor~1~0;no-loss-of-precision~eslint~cor~1~0;no-misleading-character-class~eslint~cor~1~0;no-new-native-nonconstructor~eslint~cor~1~0;no-nonoctal-decimal-escape~eslint~cor~1~0;no-obj-calls~eslint~cor~1~0;no-self-assign~eslint~cor~1~0;no-setter-return~eslint~cor~1~0;no-shadow-restricted-names~eslint~cor~1~0;no-sparse-arrays~eslint~cor~1~0;no-this-before-super~eslint~cor~1~0;no-unassigned-vars~eslint~cor~1~0;no-unreachable~eslint~cor~1~0;no-unsafe-finally~eslint~cor~1~0;no-unsafe-negation~eslint~cor~1~1;no-unsafe-optional-chaining~eslint~cor~1~0;no-unused-expressions~eslint~cor~1~0;no-unused-labels~eslint~cor~1~1;no-unused-private-class-members~eslint~cor~1~0;no-unused-vars~eslint~cor~1~1;no-useless-backreference~eslint~cor~1~0;no-useless-catch~eslint~cor~1~0;no-useless-escape~eslint~cor~1~1;no-useless-rename~eslint~cor~1~1;no-with~eslint~cor~1~0;require-yield~eslint~cor~1~0;use-isnan~eslint~cor~1~1;valid-typeof~eslint~cor~1~1;default~import~cor~0~0;namespace~import~cor~0~0;expect-expect~jest~cor~0~0;no-conditional-expect~jest~cor~0~0;no-disabled-tests~jest~cor~0~0;no-export~jest~cor~0~0;no-focused-tests~jest~cor~0~0;no-standalone-expect~jest~cor~0~0;prefer-snapshot-hint~jest~cor~0~0;require-to-throw-message~jest~cor~0~0;valid-describe-callback~jest~cor~0~0;valid-expect~jest~cor~0~0;valid-expect-in-promise~jest~cor~0~0;valid-title~jest~cor~0~1;check-property-names~jsdoc~cor~0~0;check-tag-names~jsdoc~cor~0~0;implements-on-classes~jsdoc~cor~0~0;no-defaults~jsdoc~cor~0~0;require-property~jsdoc~cor~0~0;require-property-description~jsdoc~cor~0~0;require-property-name~jsdoc~cor~0~0;require-property-type~jsdoc~cor~0~0;require-yields~jsdoc~cor~0~0;alt-text~jsx_a11y~cor~0~0;anchor-has-content~jsx_a11y~cor~0~0;anchor-is-valid~jsx_a11y~cor~0~0;aria-activedescendant-has-tabindex~jsx_a11y~cor~0~0;aria-props~jsx_a11y~cor~0~1;aria-proptypes~jsx_a11y~cor~0~0;aria-role~jsx_a11y~cor~0~0;aria-unsupported-elements~jsx_a11y~cor~0~1;autocomplete-valid~jsx_a11y~cor~0~0;click-events-have-key-events~jsx_a11y~cor~0~0;control-has-associated-label~jsx_a11y~cor~0~0;heading-has-content~jsx_a11y~cor~0~0;html-has-lang~jsx_a11y~cor~0~0;iframe-has-title~jsx_a11y~cor~0~0;img-redundant-alt~jsx_a11y~cor~0~0;interactive-supports-focus~jsx_a11y~cor~0~0;label-has-associated-control~jsx_a11y~cor~0~0;lang~jsx_a11y~cor~0~0;media-has-caption~jsx_a11y~cor~0~0;mouse-events-have-key-events~jsx_a11y~cor~0~0;no-access-key~jsx_a11y~cor~0~0;no-aria-hidden-on-focusable~jsx_a11y~cor~0~1;no-autofocus~jsx_a11y~cor~0~0;no-distracting-elements~jsx_a11y~cor~0~0;no-interactive-element-to-noninteractive-role~jsx_a11y~cor~0~0;no-noninteractive-element-interactions~jsx_a11y~cor~0~0;no-noninteractive-element-to-interactive-role~jsx_a11y~cor~0~0;no-noninteractive-tabindex~jsx_a11y~cor~0~0;no-redundant-roles~jsx_a11y~cor~0~1;no-static-element-interactions~jsx_a11y~cor~0~0;prefer-tag-over-role~jsx_a11y~cor~0~0;role-has-required-aria-props~jsx_a11y~cor~0~0;role-supports-aria-props~jsx_a11y~cor~0~0;scope~jsx_a11y~cor~0~1;tabindex-no-positive~jsx_a11y~cor~0~0;google-font-display~nextjs~cor~0~0;google-font-preconnect~nextjs~cor~0~0;inline-script-id~nextjs~cor~0~0;next-script-for-ga~nextjs~cor~0~0;no-assign-module-variable~nextjs~cor~0~0;no-async-client-component~nextjs~cor~0~0;no-before-interactive-script-outside-document~nextjs~cor~0~0;no-css-tags~nextjs~cor~0~0;no-document-import-in-page~nextjs~cor~0~0;no-duplicate-head~nextjs~cor~0~0;no-head-element~nextjs~cor~0~0;no-head-import-in-document~nextjs~cor~0~0;no-html-link-for-pages~nextjs~cor~0~0;no-img-element~nextjs~cor~0~0;no-page-custom-font~nextjs~cor~0~0;no-script-component-in-head~nextjs~cor~0~0;no-styled-jsx-in-document~nextjs~cor~0~0;no-sync-scripts~nextjs~cor~0~0;no-title-in-document-head~nextjs~cor~0~0;no-typos~nextjs~cor~0~0;no-unwanted-polyfillio~nextjs~cor~0~0;bad-array-method-on-arguments~oxc~cor~1~0;bad-char-at-comparison~oxc~cor~1~0;bad-comparison-sequence~oxc~cor~1~0;bad-match-all-arg~oxc~cor~1~0;bad-min-max-func~oxc~cor~1~0;bad-object-literal-comparison~oxc~cor~1~0;bad-replace-all-arg~oxc~cor~1~0;const-comparisons~oxc~cor~1~0;double-comparisons~oxc~cor~1~0;erasing-op~oxc~cor~1~1;missing-throw~oxc~cor~1~0;number-arg-out-of-range~oxc~cor~1~0;only-used-in-recursion~oxc~cor~1~1;uninvoked-array-callback~oxc~cor~1~0;no-callback-in-promise~promise~cor~0~0;no-new-statics~promise~cor~0~1;valid-params~promise~cor~0~0;error-boundaries~react~cor~0~0;exhaustive-deps~react~cor~0~1;forward-ref-uses-ref~react~cor~0~0;globals~react~cor~0~0;immutability~react~cor~0~0;incompatible-library~react~cor~0~0;jsx-key~react~cor~0~0;jsx-no-duplicate-props~react~cor~0~0;jsx-no-undef~react~cor~0~0;jsx-props-no-spread-multi~react~cor~0~1;no-children-prop~react~cor~0~0;no-danger-with-children~react~cor~0~0;no-did-mount-set-state~react~cor~0~0;no-did-update-set-state~react~cor~0~0;no-direct-mutation-state~react~cor~0~0;no-find-dom-node~react~cor~0~0;no-is-mounted~react~cor~0~0;no-render-return-value~react~cor~0~0;no-string-refs~react~cor~0~0;no-this-in-sfc~react~cor~0~0;no-unsafe~react~cor~0~0;no-will-update-set-state~react~cor~0~0;preserve-manual-memoization~react~cor~0~0;purity~react~cor~0~0;refs~react~cor~0~0;set-state-in-effect~react~cor~0~0;set-state-in-render~react~cor~0~0;static-components~react~cor~0~0;use-memo~react~cor~0~0;void-dom-elements-no-children~react~cor~0~0;void-use-memo~react~cor~0~0;await-thenable~typescript~cor~1~0;no-array-delete~typescript~cor~1~0;no-base-to-string~typescript~cor~1~0;no-duplicate-enum-values~typescript~cor~1~0;no-duplicate-type-constituents~typescript~cor~1~1;no-extra-non-null-assertion~typescript~cor~1~1;no-floating-promises~typescript~cor~1~0;no-for-in-array~typescript~cor~1~0;no-implied-eval~typescript~cor~1~0;no-meaningless-void-operator~typescript~cor~1~1;no-misused-new~typescript~cor~1~0;no-misused-spread~typescript~cor~1~0;no-non-null-asserted-optional-chain~typescript~cor~1~0;no-redundant-type-constituents~typescript~cor~1~0;no-this-alias~typescript~cor~1~0;no-unnecessary-parameter-property-assignment~typescript~cor~1~0;no-unsafe-declaration-merging~typescript~cor~1~0;no-unsafe-unary-minus~typescript~cor~1~0;no-useless-default-assignment~typescript~cor~1~0;no-useless-empty-export~typescript~cor~1~1;no-wrapper-object-types~typescript~cor~1~1;prefer-as-const~typescript~cor~1~1;prefer-namespace-keyword~typescript~cor~1~1;require-array-sort-compare~typescript~cor~1~0;restrict-template-expressions~typescript~cor~1~0;triple-slash-reference~typescript~cor~1~0;unbound-method~typescript~cor~1~0;no-await-in-promise-methods~unicorn~cor~1~0;no-empty-file~unicorn~cor~1~0;no-invalid-fetch-options~unicorn~cor~1~0;no-invalid-remove-event-listener~unicorn~cor~1~0;no-new-array~unicorn~cor~1~0;no-single-promise-in-promise-methods~unicorn~cor~1~1;no-thenable~unicorn~cor~1~0;no-unnecessary-await~unicorn~cor~1~1;no-useless-fallback-in-spread~unicorn~cor~1~1;no-useless-length-check~unicorn~cor~1~0;no-useless-spread~unicorn~cor~1~1;prefer-set-size~unicorn~cor~1~1;prefer-string-starts-ends-with~unicorn~cor~1~1;expect-expect~vitest~cor~0~0;hoisted-apis-on-top~vitest~cor~0~0;no-conditional-expect~vitest~cor~0~0;no-conditional-tests~vitest~cor~0~0;no-disabled-tests~vitest~cor~0~0;no-focused-tests~vitest~cor~0~0;no-standalone-expect~vitest~cor~0~0;prefer-snapshot-hint~vitest~cor~0~0;require-awaited-expect-poll~vitest~cor~0~0;require-local-test-context-for-concurrent-snapshots~vitest~cor~0~0;require-mock-type-parameters~vitest~cor~0~0;require-to-throw-message~vitest~cor~0~0;valid-describe-callback~vitest~cor~0~0;valid-expect~vitest~cor~0~0;valid-expect-in-promise~vitest~cor~0~0;valid-title~vitest~cor~0~1;warn-todo~vitest~cor~0~0;no-arrow-functions-in-watch~vue~cor~0~0;no-async-in-computed-properties~vue~cor~0~0;no-computed-properties-in-data~vue~cor~0~0;no-deprecated-data-object-declaration~vue~cor~0~0;no-deprecated-delete-set~vue~cor~0~0;no-deprecated-destroyed-lifecycle~vue~cor~0~1;no-deprecated-events-api~vue~cor~0~0;no-deprecated-model-definition~vue~cor~0~0;no-deprecated-props-default-this~vue~cor~0~0;no-deprecated-vue-config-keycodes~vue~cor~0~0;no-dupe-keys~vue~cor~0~0;no-export-in-script-setup~vue~cor~0~0;no-expose-after-await~vue~cor~0~0;no-lifecycle-after-await~vue~cor~0~0;no-reserved-component-names~vue~cor~0~0;no-reserved-keys~vue~cor~0~0;no-reserved-props~vue~cor~0~0;no-shared-component-data~vue~cor~0~0;no-side-effects-in-computed-properties~vue~cor~0~0;no-this-in-before-route-enter~vue~cor~0~0;no-watch-after-await~vue~cor~0~0;prefer-import-from-vue~vue~cor~0~1;require-prop-type-constructor~vue~cor~0~1;require-render-return~vue~cor~0~0;require-slots-as-functions~vue~cor~0~0;return-in-computed-property~vue~cor~0~0;return-in-emits-validator~vue~cor~0~0;valid-define-emits~vue~cor~0~0;valid-define-options~vue~cor~0~0;valid-define-props~vue~cor~0~0;valid-next-tick~vue~cor~0~1;no-await-in-loop~eslint~per~0~0;no-useless-call~eslint~per~0~0;no-accumulating-spread~oxc~per~0~0;no-map-spread~oxc~per~0~0;jsx-no-constructed-context-values~react~per~0~0;no-array-index-key~react~per~0~0;no-deriving-state-in-effects~react~per~0~0;no-object-type-as-default-prop~react~per~0~0;jsx-no-jsx-as-prop~react_perf~per~0~0;jsx-no-new-array-as-prop~react_perf~per~0~0;jsx-no-new-function-as-prop~react_perf~per~0~0;jsx-no-new-object-as-prop~react_perf~per~0~0;prefer-array-find~unicorn~per~0~0;prefer-array-flat-map~unicorn~per~0~1;prefer-set-has~unicorn~per~0~1;class-methods-use-this~eslint~res~0~0;complexity~eslint~res~0~0;default-case~eslint~res~0~0;no-alert~eslint~res~0~0;no-bitwise~eslint~res~0~0;no-console~eslint~res~0~0;no-div-regex~eslint~res~0~1;no-empty~eslint~res~0~0;no-empty-function~eslint~res~0~0;no-eq-null~eslint~res~0~1;no-implicit-globals~eslint~res~0~0;no-param-reassign~eslint~res~0~0;no-plusplus~eslint~res~0~0;no-proto~eslint~res~0~0;no-regex-spaces~eslint~res~0~1;no-restricted-globals~eslint~res~0~0;no-restricted-imports~eslint~res~0~0;no-restricted-properties~eslint~res~0~0;no-sequences~eslint~res~0~0;no-undefined~eslint~res~0~0;no-use-before-define~eslint~res~0~0;no-var~eslint~res~0~1;no-void~eslint~res~0~0;unicode-bom~eslint~res~0~1;extensions~import~res~0~0;no-amd~import~res~0~0;no-commonjs~import~res~0~0;no-cycle~import~res~0~0;no-default-export~import~res~0~0;no-dynamic-require~import~res~0~0;no-relative-parent-imports~import~res~0~0;no-webpack-loader-syntax~import~res~0~0;unambiguous~import~res~0~0;check-access~jsdoc~res~0~0;empty-tags~jsdoc~res~0~0;anchor-ambiguous-text~jsx_a11y~res~0~0;handle-callback-err~node~res~0~0;no-new-require~node~res~0~0;no-path-concat~node~res~0~0;no-process-env~node~res~0~0;no-top-level-await~node~res~0~0;bad-bitwise-operator~oxc~res~0~0;no-async-await~oxc~res~0~0;no-barrel-file~oxc~res~0~0;no-const-enum~oxc~res~0~1;no-optional-chaining~oxc~res~0~0;no-rest-spread-properties~oxc~res~0~0;catch-or-return~promise~res~0~0;spec-only~promise~res~0~0;button-has-type~react~res~0~0;forbid-component-props~react~res~0~0;forbid-dom-props~react~res~0~0;forbid-elements~react~res~0~0;invariant~react~res~0~0;jsx-filename-extension~react~res~0~0;jsx-no-literals~react~res~0~0;no-clone-element~react~res~0~0;no-danger~react~res~0~0;no-multi-comp~react~res~0~0;no-react-children~react~res~0~0;no-unknown-property~react~res~0~0;only-export-components~react~res~0~0;prefer-function-component~react~res~0~0;rule-suppression~react~res~0~0;syntax~react~res~0~0;todo~react~res~0~0;unsupported-syntax~react~res~0~0;explicit-function-return-type~typescript~res~0~0;explicit-member-accessibility~typescript~res~0~1;explicit-module-boundary-types~typescript~res~0~0;no-dynamic-delete~typescript~res~0~0;no-empty-object-type~typescript~res~0~0;no-explicit-any~typescript~res~0~1;no-import-type-side-effects~typescript~res~0~1;no-invalid-void-type~typescript~res~0~0;no-namespace~typescript~res~0~0;no-non-null-asserted-nullish-coalescing~typescript~res~0~0;no-non-null-assertion~typescript~res~0~0;no-require-imports~typescript~res~0~0;no-restricted-types~typescript~res~0~1;no-var-requires~typescript~res~0~0;non-nullable-type-assertion-style~typescript~res~0~0;prefer-literal-enum-member~typescript~res~0~0;promise-function-async~typescript~res~0~1;use-unknown-in-catch-callback-variable~typescript~res~0~0;import-style~unicorn~res~0~0;no-abusive-eslint-disable~unicorn~res~0~0;no-anonymous-default-export~unicorn~res~0~0;no-array-for-each~unicorn~res~0~0;no-array-reduce~unicorn~res~0~0;no-document-cookie~unicorn~res~0~0;no-length-as-slice-end~unicorn~res~0~1;no-magic-array-flat-depth~unicorn~res~0~0;no-process-exit~unicorn~res~0~0;no-useless-error-capture-stack-trace~unicorn~res~0~0;prefer-modern-math-apis~unicorn~res~0~0;prefer-module~unicorn~res~0~0;prefer-node-protocol~unicorn~res~0~1;prefer-number-properties~unicorn~res~0~1;require-test-timeout~vitest~res~0~0;max-props~vue~res~0~0;no-import-compiler-macros~vue~res~0~1;no-multiple-slot-args~vue~res~0~0;block-scoped-var~eslint~sus~0~0;no-extend-native~eslint~sus~0~0;no-extra-bind~eslint~sus~0~0;no-implied-eval~eslint~sus~0~0;no-new~eslint~sus~0~0;no-shadow~eslint~sus~0~0;no-underscore-dangle~eslint~sus~0~0;no-unexpected-multiline~eslint~sus~0~1;no-unmodified-loop-condition~eslint~sus~0~0;no-unneeded-ternary~eslint~sus~0~1;no-useless-concat~eslint~sus~0~0;no-useless-constructor~eslint~sus~0~0;preserve-caught-error~eslint~sus~0~1;no-absolute-path~import~sus~0~0;no-empty-named-blocks~import~sus~0~1;no-named-as-default~import~sus~0~0;no-named-as-default-member~import~sus~0~0;no-self-import~import~sus~0~0;no-unassigned-import~import~sus~0~0;no-commented-out-tests~jest~sus~0~0;no-exports-assign~node~sus~0~1;approx-constant~oxc~sus~0~0;misrefactored-assign-op~oxc~sus~0~0;no-async-endpoint-handlers~oxc~sus~0~0;no-this-in-exported-function~oxc~sus~0~0;always-return~promise~sus~0~0;no-multiple-resolved~promise~sus~0~0;no-promise-in-callback~promise~sus~0~0;capitalized-calls~react~sus~0~0;exhaustive-effect-dependencies~react~sus~0~0;hooks~react~sus~0~0;iframe-missing-sandbox~react~sus~0~0;jsx-no-comment-textnodes~react~sus~0~0;jsx-no-script-url~react~sus~0~0;memo-dependencies~react~sus~0~0;no-namespace~react~sus~0~0;no-unstable-nested-components~react~sus~0~0;react-in-jsx-scope~react~sus~0~0;style-prop-object~react~sus~0~0;consistent-return~typescript~sus~0~0;no-confusing-non-null-assertion~typescript~sus~0~0;no-extraneous-class~typescript~sus~0~0;no-generated-empty-object-type~typescript~sus~0~0;no-unnecessary-boolean-literal-compare~typescript~sus~0~1;no-unnecessary-template-expression~typescript~sus~0~1;no-unnecessary-type-arguments~typescript~sus~0~1;no-unnecessary-type-assertion~typescript~sus~0~1;no-unnecessary-type-constraint~typescript~sus~0~0;no-unnecessary-type-conversion~typescript~sus~0~0;no-unnecessary-type-parameters~typescript~sus~0~0;no-unsafe-enum-comparison~typescript~sus~0~0;no-unsafe-type-assertion~typescript~sus~0~0;consistent-function-scoping~unicorn~sus~0~0;no-accessor-recursion~unicorn~sus~0~0;no-array-fill-with-reference-type~unicorn~sus~0~0;no-array-reverse~unicorn~sus~0~0;no-array-sort~unicorn~sus~0~0;no-confusing-array-with~unicorn~sus~0~0;no-instanceof-builtins~unicorn~sus~0~0;prefer-add-event-listener~unicorn~sus~0~0;require-module-specifiers~unicorn~sus~0~1;require-post-message-target-origin~unicorn~sus~0~0;no-commented-out-tests~vitest~sus~0~0;no-required-prop-with-default~vue~sus~0~0;require-default-export~vue~sus~0~0;accessor-pairs~eslint~ped~0~0;array-callback-return~eslint~ped~0~0;eqeqeq~eslint~ped~0~1;max-classes-per-file~eslint~ped~0~0;max-depth~eslint~ped~0~0;max-lines~eslint~ped~0~0;max-lines-per-function~eslint~ped~0~0;max-nested-callbacks~eslint~ped~0~0;no-array-constructor~eslint~ped~0~1;no-case-declarations~eslint~ped~0~0;no-constructor-return~eslint~ped~0~0;no-else-return~eslint~ped~0~1;no-fallthrough~eslint~ped~0~0;no-inline-comments~eslint~ped~0~0;no-inner-declarations~eslint~ped~0~0;no-lonely-if~eslint~ped~0~0;no-loop-func~eslint~ped~0~0;no-negated-condition~eslint~ped~0~1;no-new-wrappers~eslint~ped~0~1;no-object-constructor~eslint~ped~0~0;no-promise-executor-return~eslint~ped~0~0;no-prototype-builtins~eslint~ped~0~0;no-redeclare~eslint~ped~0~0;no-self-compare~eslint~ped~0~0;no-throw-literal~eslint~ped~0~0;no-useless-return~eslint~ped~0~0;no-warning-comments~eslint~ped~0~0;prefer-promise-reject-errors~eslint~ped~0~0;radix~eslint~ped~0~1;require-await~eslint~ped~0~1;require-unicode-regexp~eslint~ped~0~0;sort-vars~eslint~ped~0~1;symbol-description~eslint~ped~0~0;max-dependencies~import~ped~0~0;no-conditional-in-test~jest~ped~0~0;require-param~jsdoc~ped~0~0;require-param-description~jsdoc~ped~0~0;require-param-name~jsdoc~ped~0~0;require-param-type~jsdoc~ped~0~1;require-returns~jsdoc~ped~0~0;require-returns-description~jsdoc~ped~0~0;require-returns-type~jsdoc~ped~0~0;require-throws-type~jsdoc~ped~0~0;require-yields-type~jsdoc~ped~0~0;branches-sharing-code~oxc~ped~0~0;checked-requires-onchange-or-readonly~react~ped~0~0;display-name~react~ped~0~0;jsx-no-target-blank~react~ped~0~0;jsx-no-useless-fragment~react~ped~0~0;no-unescaped-entities~react~ped~0~0;rules-of-hooks~react~ped~0~0;ban-ts-comment~typescript~ped~0~1;ban-types~typescript~ped~0~0;no-confusing-void-expression~typescript~ped~0~1;no-deprecated~typescript~ped~0~0;no-misused-promises~typescript~ped~0~0;no-mixed-enums~typescript~ped~0~0;no-unsafe-argument~typescript~ped~0~0;no-unsafe-assignment~typescript~ped~0~0;no-unsafe-call~typescript~ped~0~0;no-unsafe-function-type~typescript~ped~0~0;no-unsafe-member-access~typescript~ped~0~0;no-unsafe-return~typescript~ped~0~0;only-throw-error~typescript~ped~0~0;prefer-enum-initializers~typescript~ped~0~0;prefer-includes~typescript~ped~0~1;prefer-nullish-coalescing~typescript~ped~0~1;prefer-promise-reject-errors~typescript~ped~0~0;prefer-readonly-parameter-types~typescript~ped~0~0;prefer-ts-expect-error~typescript~ped~0~1;related-getter-setter-pairs~typescript~ped~0~0;require-await~typescript~ped~0~0;restrict-plus-operands~typescript~ped~0~0;return-await~typescript~ped~0~1;strict-boolean-expressions~typescript~ped~0~0;strict-void-return~typescript~ped~0~0;switch-exhaustiveness-check~typescript~ped~0~0;consistent-assert~unicorn~ped~0~1;consistent-empty-array-spread~unicorn~ped~0~0;escape-case~unicorn~ped~0~1;explicit-length-check~unicorn~ped~0~1;new-for-builtins~unicorn~ped~0~0;no-array-callback-reference~unicorn~ped~0~0;no-hex-escape~unicorn~ped~0~1;no-immediate-mutation~unicorn~ped~0~0;no-instanceof-array~unicorn~ped~0~1;no-lonely-if~unicorn~ped~0~0;no-negated-condition~unicorn~ped~0~1;no-negation-in-equality-check~unicorn~ped~0~0;no-new-buffer~unicorn~ped~0~0;no-object-as-default-parameter~unicorn~ped~0~0;no-static-only-class~unicorn~ped~0~1;no-this-assignment~unicorn~ped~0~0;no-typeof-undefined~unicorn~ped~0~1;no-unnecessary-array-flat-depth~unicorn~ped~0~0;no-unnecessary-array-splice-count~unicorn~ped~0~1;no-unnecessary-slice-end~unicorn~ped~0~1;no-unreadable-iife~unicorn~ped~0~0;no-useless-promise-resolve-reject~unicorn~ped~0~1;no-useless-switch-case~unicorn~ped~0~0;no-useless-undefined~unicorn~ped~0~1;prefer-array-flat~unicorn~ped~0~1;prefer-array-some~unicorn~ped~0~0;prefer-at~unicorn~ped~0~1;prefer-blob-reading-methods~unicorn~ped~0~0;prefer-code-point~unicorn~ped~0~1;prefer-date-now~unicorn~ped~0~1;prefer-dom-node-append~unicorn~ped~0~1;prefer-dom-node-dataset~unicorn~ped~0~1;prefer-dom-node-remove~unicorn~ped~0~0;prefer-event-target~unicorn~ped~0~0;prefer-import-meta-properties~unicorn~ped~0~1;prefer-math-min-max~unicorn~ped~0~0;prefer-math-trunc~unicorn~ped~0~0;prefer-native-coercion-functions~unicorn~ped~0~0;prefer-number-coercion~unicorn~ped~0~0;prefer-prototype-methods~unicorn~ped~0~1;prefer-query-selector~unicorn~ped~0~1;prefer-regexp-test~unicorn~ped~0~1;prefer-single-call~unicorn~ped~0~1;prefer-string-replace-all~unicorn~ped~0~1;prefer-string-slice~unicorn~ped~0~1;prefer-top-level-await~unicorn~ped~0~0;prefer-type-error~unicorn~ped~0~1;require-number-to-fixed-digits-argument~unicorn~ped~0~1;no-conditional-in-test~vitest~ped~0~0;arrow-body-style~eslint~sty~0~1;capitalized-comments~eslint~sty~0~1;curly~eslint~sty~0~1;default-case-last~eslint~sty~0~0;default-param-last~eslint~sty~0~0;func-name-matching~eslint~sty~0~0;func-names~eslint~sty~0~1;func-style~eslint~sty~0~0;grouped-accessor-pairs~eslint~sty~0~0;guard-for-in~eslint~sty~0~0;id-denylist~eslint~sty~0~0;id-length~eslint~sty~0~0;id-match~eslint~sty~0~0;init-declarations~eslint~sty~0~0;logical-assignment-operators~eslint~sty~0~0;max-params~eslint~sty~0~0;max-statements~eslint~sty~0~0;new-cap~eslint~sty~0~0;no-continue~eslint~sty~0~0;no-duplicate-imports~eslint~sty~0~0;no-extra-label~eslint~sty~0~1;no-implicit-coercion~eslint~sty~0~1;no-label-var~eslint~sty~0~0;no-labels~eslint~sty~0~0;no-lone-blocks~eslint~sty~0~0;no-magic-numbers~eslint~sty~0~0;no-multi-assign~eslint~sty~0~0;no-multi-str~eslint~sty~0~0;no-nested-ternary~eslint~sty~0~0;no-new-func~eslint~sty~0~0;no-return-assign~eslint~sty~0~0;no-script-url~eslint~sty~0~0;no-template-curly-in-string~eslint~sty~0~0;no-ternary~eslint~sty~0~0;no-useless-computed-key~eslint~sty~0~1;object-shorthand~eslint~sty~0~1;one-var~eslint~sty~0~1;operator-assignment~eslint~sty~0~1;prefer-arrow-callback~eslint~sty~0~1;prefer-const~eslint~sty~0~1;prefer-destructuring~eslint~sty~0~1;prefer-exponentiation-operator~eslint~sty~0~1;prefer-named-capture-group~eslint~sty~0~0;prefer-numeric-literals~eslint~sty~0~1;prefer-object-has-own~eslint~sty~0~1;prefer-object-spread~eslint~sty~0~1;prefer-regex-literals~eslint~sty~0~0;prefer-rest-params~eslint~sty~0~0;prefer-spread~eslint~sty~0~0;prefer-template~eslint~sty~0~1;sort-imports~eslint~sty~0~1;sort-keys~eslint~sty~0~1;vars-on-top~eslint~sty~0~0;yoda~eslint~sty~0~1;consistent-type-specifier-style~import~sty~0~1;exports-last~import~sty~0~0;first~import~sty~0~0;group-exports~import~sty~0~0;newline-after-import~import~sty~0~1;no-anonymous-default-export~import~sty~0~0;no-duplicates~import~sty~0~1;no-mutable-exports~import~sty~0~0;no-named-default~import~sty~0~0;no-named-export~import~sty~0~0;no-namespace~import~sty~0~0;no-nodejs-modules~import~sty~0~0;prefer-default-export~import~sty~0~0;consistent-test-it~jest~sty~0~1;max-expects~jest~sty~0~0;max-nested-describe~jest~sty~0~0;no-alias-methods~jest~sty~0~1;no-confusing-set-timeout~jest~sty~0~0;no-deprecated-functions~jest~sty~0~1;no-done-callback~jest~sty~0~0;no-duplicate-hooks~jest~sty~0~0;no-hooks~jest~sty~0~0;no-identical-title~jest~sty~0~0;no-interpolation-in-snapshots~jest~sty~0~0;no-jasmine-globals~jest~sty~0~1;no-large-snapshots~jest~sty~0~0;no-mocks-import~jest~sty~0~0;no-restricted-jest-methods~jest~sty~0~0;no-restricted-matchers~jest~sty~0~0;no-test-prefixes~jest~sty~0~1;no-test-return-statement~jest~sty~0~0;no-unneeded-async-expect-function~jest~sty~0~1;no-untyped-mock-factory~jest~sty~0~1;padding-around-after-all-blocks~jest~sty~0~1;padding-around-test-blocks~jest~sty~0~1;prefer-called-with~jest~sty~0~1;prefer-comparison-matcher~jest~sty~0~1;prefer-each~jest~sty~0~0;prefer-ending-with-an-expect~jest~sty~0~0;prefer-equality-matcher~jest~sty~0~0;prefer-expect-assertions~jest~sty~0~0;prefer-expect-resolves~jest~sty~0~1;prefer-hooks-in-order~jest~sty~0~0;prefer-hooks-on-top~jest~sty~0~0;prefer-importing-jest-globals~jest~sty~0~1;prefer-jest-mocked~jest~sty~0~1;prefer-lowercase-title~jest~sty~0~1;prefer-mock-promise-shorthand~jest~sty~0~1;prefer-mock-return-shorthand~jest~sty~0~1;prefer-spy-on~jest~sty~0~0;prefer-strict-equal~jest~sty~0~0;prefer-to-be~jest~sty~0~1;prefer-to-contain~jest~sty~0~1;prefer-to-have-been-called~jest~sty~0~1;prefer-to-have-been-called-times~jest~sty~0~1;prefer-to-have-length~jest~sty~0~1;prefer-todo~jest~sty~0~1;require-hook~jest~sty~0~0;require-top-level-describe~jest~sty~0~0;no-blank-blocks~jsdoc~sty~0~1;require-throws-description~jsdoc~sty~0~0;require-yields-description~jsdoc~sty~0~0;callback-return~node~sty~0~0;exports-style~node~sty~0~0;global-require~node~sty~0~0;no-mixed-requires~node~sty~0~0;no-sync~node~sty~0~0;avoid-new~promise~sty~0~0;no-nesting~promise~sty~0~0;no-return-wrap~promise~sty~0~0;param-names~promise~sty~0~0;prefer-await-to-callbacks~promise~sty~0~0;prefer-await-to-then~promise~sty~0~0;prefer-catch~promise~sty~0~0;function-component-definition~react~sty~0~0;hook-use-state~react~sty~0~0;jsx-boolean-value~react~sty~0~1;jsx-curly-brace-presence~react~sty~0~1;jsx-fragments~react~sty~0~1;jsx-handler-names~react~sty~0~0;jsx-max-depth~react~sty~0~0;jsx-pascal-case~react~sty~0~0;jsx-props-no-spreading~react~sty~0~0;no-redundant-should-component-update~react~sty~0~0;no-set-state~react~sty~0~0;prefer-es6-class~react~sty~0~0;self-closing-comp~react~sty~0~1;state-in-constructor~react~sty~0~0;adjacent-overload-signatures~typescript~sty~0~0;array-type~typescript~sty~0~1;ban-tslint-comment~typescript~sty~0~1;class-literal-property-style~typescript~sty~0~0;consistent-generic-constructors~typescript~sty~0~1;consistent-indexed-object-style~typescript~sty~0~1;consistent-type-assertions~typescript~sty~0~1;consistent-type-definitions~typescript~sty~0~1;consistent-type-exports~typescript~sty~0~1;consistent-type-imports~typescript~sty~0~1;dot-notation~typescript~sty~0~1;method-signature-style~typescript~sty~0~0;no-empty-interface~typescript~sty~0~0;no-inferrable-types~typescript~sty~0~0;no-unnecessary-qualifier~typescript~sty~0~0;parameter-properties~typescript~sty~0~0;prefer-find~typescript~sty~0~0;prefer-for-of~typescript~sty~0~0;prefer-function-type~typescript~sty~0~1;prefer-readonly~typescript~sty~0~1;prefer-reduce-type-parameter~typescript~sty~0~1;prefer-regexp-exec~typescript~sty~0~0;prefer-return-this-type~typescript~sty~0~1;prefer-string-starts-ends-with~typescript~sty~0~1;unified-signatures~typescript~sty~0~0;catch-error-name~unicorn~sty~0~1;consistent-date-clone~unicorn~sty~0~1;consistent-existence-index-check~unicorn~sty~0~1;consistent-template-literal-escape~unicorn~sty~0~1;custom-error-definition~unicorn~sty~0~0;empty-brace-spaces~unicorn~sty~0~1;error-message~unicorn~sty~0~0;explicit-timer-delay~unicorn~sty~0~1;filename-case~unicorn~sty~0~0;max-nested-calls~unicorn~sty~0~0;no-array-method-this-argument~unicorn~sty~0~0;no-await-expression-member~unicorn~sty~0~1;no-console-spaces~unicorn~sty~0~1;no-nested-ternary~unicorn~sty~0~1;no-null~unicorn~sty~0~1;no-unreadable-array-destructuring~unicorn~sty~0~0;no-useless-collection-argument~unicorn~sty~0~0;no-zero-fractions~unicorn~sty~0~1;number-literal-case~unicorn~sty~0~1;numeric-separators-style~unicorn~sty~0~1;prefer-array-index-of~unicorn~sty~0~0;prefer-bigint-literals~unicorn~sty~0~1;prefer-class-fields~unicorn~sty~0~1;prefer-classlist-toggle~unicorn~sty~0~1;prefer-default-parameters~unicorn~sty~0~0;prefer-dom-node-text-content~unicorn~sty~0~1;prefer-export-from~unicorn~sty~0~0;prefer-global-this~unicorn~sty~0~0;prefer-includes~unicorn~sty~0~0;prefer-keyboard-event-key~unicorn~sty~0~1;prefer-logical-operator-over-ternary~unicorn~sty~0~0;prefer-modern-dom-apis~unicorn~sty~0~0;prefer-negative-index~unicorn~sty~0~1;prefer-object-from-entries~unicorn~sty~0~0;prefer-optional-catch-binding~unicorn~sty~0~1;prefer-reflect-apply~unicorn~sty~0~0;prefer-response-static-json~unicorn~sty~0~0;prefer-spread~unicorn~sty~0~1;prefer-string-raw~unicorn~sty~0~1;prefer-string-trim-start-end~unicorn~sty~0~1;prefer-structured-clone~unicorn~sty~0~0;prefer-ternary~unicorn~sty~0~0;relative-url-style~unicorn~sty~0~1;require-array-join-separator~unicorn~sty~0~1;require-module-attributes~unicorn~sty~0~0;switch-case-braces~unicorn~sty~0~1;switch-case-break-position~unicorn~sty~0~0;text-encoding-identifier-case~unicorn~sty~0~1;throw-new-error~unicorn~sty~0~1;consistent-each-for~vitest~sty~0~0;consistent-test-filename~vitest~sty~0~0;consistent-test-it~vitest~sty~0~1;consistent-vitest-vi~vitest~sty~0~1;max-expects~vitest~sty~0~0;max-nested-describe~vitest~sty~0~0;no-alias-methods~vitest~sty~0~1;no-duplicate-hooks~vitest~sty~0~0;no-hooks~vitest~sty~0~0;no-identical-title~vitest~sty~0~0;no-import-node-test~vitest~sty~0~0;no-importing-vitest-globals~vitest~sty~0~1;no-interpolation-in-snapshots~vitest~sty~0~0;no-large-snapshots~vitest~sty~0~0;no-mocks-import~vitest~sty~0~0;no-restricted-matchers~vitest~sty~0~0;no-restricted-vi-methods~vitest~sty~0~0;no-test-prefixes~vitest~sty~0~1;no-test-return-statement~vitest~sty~0~0;no-unneeded-async-expect-function~vitest~sty~0~1;padding-around-after-all-blocks~vitest~sty~0~1;padding-around-test-blocks~vitest~sty~0~1;prefer-called-exactly-once-with~vitest~sty~0~1;prefer-called-once~vitest~sty~0~1;prefer-called-times~vitest~sty~0~1;prefer-called-with~vitest~sty~0~1;prefer-comparison-matcher~vitest~sty~0~1;prefer-describe-function-title~vitest~sty~0~1;prefer-each~vitest~sty~0~0;prefer-equality-matcher~vitest~sty~0~0;prefer-expect-assertions~vitest~sty~0~0;prefer-expect-resolves~vitest~sty~0~1;prefer-expect-type-of~vitest~sty~0~1;prefer-hooks-in-order~vitest~sty~0~0;prefer-hooks-on-top~vitest~sty~0~0;prefer-import-in-mock~vitest~sty~0~1;prefer-importing-vitest-globals~vitest~sty~0~1;prefer-lowercase-title~vitest~sty~0~1;prefer-mock-promise-shorthand~vitest~sty~0~1;prefer-mock-return-shorthand~vitest~sty~0~1;prefer-spy-on~vitest~sty~0~0;prefer-strict-boolean-matchers~vitest~sty~0~1;prefer-strict-equal~vitest~sty~0~0;prefer-to-be~vitest~sty~0~1;prefer-to-be-falsy~vitest~sty~0~0;prefer-to-be-object~vitest~sty~0~1;prefer-to-be-truthy~vitest~sty~0~0;prefer-to-contain~vitest~sty~0~1;prefer-to-have-been-called-times~vitest~sty~0~1;prefer-to-have-length~vitest~sty~0~1;prefer-todo~vitest~sty~0~1;require-hook~vitest~sty~0~0;require-top-level-describe~vitest~sty~0~0;component-definition-name-casing~vue~sty~0~1;define-emits-declaration~vue~sty~0~0;define-props-declaration~vue~sty~0~0;define-props-destructuring~vue~sty~0~0;next-tick-style~vue~sty~0~1;prop-name-casing~vue~sty~0~0;require-default-prop~vue~sty~0~0;require-direct-export~vue~sty~0~0;require-prop-types~vue~sty~0~0;require-typed-ref~vue~sty~0~0;no-restricted-exports~eslint~nur~0~0;no-undef~eslint~nur~0~0;no-unreachable-loop~eslint~nur~0~0;no-useless-assignment~eslint~nur~0~0;export~import~nur~0~0;named~import~nur~0~0;no-return-in-finally~promise~nur~0~0;require-render-return~react~nur~0~0;no-unnecessary-condition~typescript~nur~0~0;prefer-optional-chain~typescript~nur~0~1;no-useless-iterator-to-array~unicorn~nur~0~1";
+const CATS = [
+  ["cor","correctness","代码确实写错了","确定是 bug 或死代码，误报率极低"],
+  ["sus","suspicious","代码看起来写错了","很可能有问题，但存在少数误报"],
+  ["per","perf","能跑，但跑得慢","有更高效的写法"],
+  ["sty","style","能跑，但不像团队写法","纯风格，不影响正确性"],
+  ["ped","pedantic","极其严格","要求很高，误报相对多"],
+  ["res","restriction","禁止某些特性","团队策略，不是质量问题"],
+  ["nur","nursery","实验中的新规则","还在开发，可能变"]
+];
+
+const SCENES = [
+  ["assign","变量赋值写错","给不该改的东西赋值，或者赋值给了自己"],
+  ["unused","写了没用 / 跑不到","声明、表达式、代码块白写了"],
+  ["cond","条件与比较写错","if 判断、NaN、typeof、连续比较这类经典坑"],
+  ["dupe","重复定义","同一个 key、case、类型成员写了两次"],
+  ["arr","数组与集合用法错","sort 不传比较、for...in 遍历数组、delete 数组元素"],
+  ["async","Promise 与异步","忘了 await、await 了非 Promise、错误被吞掉"],
+  ["ts","TypeScript 类型问题","类型断言、this 绑定、模板字符串、包装类型"],
+  ["cls","类与继承","super 调用时机、getter/setter 返回值"],
+  ["regex","正则与字符串","非法正则、无效转义、不可见空白字符"],
+  ["err","错误处理","catch 里原样抛出、finally 吞掉返回值"],
+  ["danger","危险 API 与全局","eval、with、debugger、改写内置对象"],
+  ["misc","其他零散","数字精度、空解构、循环方向等"]
+];
+
+const ZH = {
+"no-const-assign":["给 const 声明的变量重新赋值","assign"],
+"no-class-assign":["给类名重新赋值","assign"],
+"no-func-assign":["给函数声明重新赋值","assign"],
+"no-import-assign":["给 import 进来的绑定重新赋值","assign"],
+"no-global-assign":["给只读全局变量赋值，比如 undefined = 1","assign"],
+"no-ex-assign":["给 catch 的异常参数重新赋值","assign"],
+"no-self-assign":["把变量赋值给自己，比如 x = x","assign"],
+"no-unassigned-vars":["用 let 声明了却从没赋过值","assign"],
+"no-delete-var":["对变量用 delete，实际会静默失败","assign"],
+
+"no-unused-vars":["声明了但没用到的变量、参数、函数","unused"],
+"no-unreachable":["return 或 throw 之后的代码永远跑不到","unused"],
+"no-unused-labels":["打了标签但从来没用 break / continue 引用","unused"],
+"no-unused-private-class-members":["类的私有成员从没被访问过","unused"],
+"no-unused-expressions":["写了个表达式但结果没人用，比如单独一行的 a && b()","unused"],
+"only-used-in-recursion":["这个参数只用来递归传给自己，等于没起作用","unused"],
+"no-empty-file":["空文件","unused"],
+
+"no-cond-assign":["if / while 的条件里写了赋值，= 写成 == 的经典事故","cond"],
+"no-constant-condition":["条件是常量，比如 if (true) 或 while (1)","cond"],
+"no-constant-binary-expression":["常量表达式做比较，结果永远一样，比如 x === x","cond"],
+"no-compare-neg-zero":["和 -0 比较，用 === 0 永远抓不到 -0","cond"],
+"use-isnan":["用 === NaN 判断 NaN，永远返回 false，该用 Number.isNaN","cond"],
+"valid-typeof":["typeof 后面类型名写错，比如 typeof x === \"strnig\"","cond"],
+"no-unsafe-negation":["! 用错优先级，比如 !key in obj 实际是 (!key) in obj","cond"],
+"bad-comparison-sequence":["连续比较写错，a < b < c 实际是 (a<b) < c","cond"],
+"double-comparisons":["同一个值连着比较两次，条件写重了","cond"],
+"const-comparisons":["两个常量做比较，结果恒定","cond"],
+"bad-object-literal-comparison":["用对象字面量做比较，引用不同永远不相等","cond"],
+"bad-char-at-comparison":["charAt() 直接和字符串比，少写了索引","cond"],
+"no-extra-boolean-cast":["多余的布尔转换，比如 if (!!x)","cond"],
+
+"no-dupe-keys":["对象字面量里重复的 key，后面的会覆盖前面的","dupe"],
+"no-dupe-class-members":["类里重复定义同名成员","dupe"],
+"no-dupe-else-if":["if / else if 里有重复的条件","dupe"],
+"no-duplicate-case":["switch 里重复的 case","dupe"],
+"no-duplicate-enum-values":["enum 里重复的值","dupe"],
+"no-duplicate-type-constituents":["联合类型里重复的成员，比如 string | string","dupe"],
+"no-redundant-type-constituents":["联合类型里有被覆盖的冗余成员，比如 string | \"a\"","dupe"],
+
+"no-sparse-arrays":["数组里有空洞，比如 [1, , 3]","arr"],
+"no-array-delete":["对数组元素用 delete，会留下空洞，该用 splice","arr"],
+"no-for-in-array":["用 for...in 遍历数组，会遍历到原型链上的东西","arr"],
+"require-array-sort-compare":["sort 不传比较函数，默认按字符串排，[10,9] 会排错","arr"],
+"prefer-set-size":["判断集合大小该用 size，而不是遍历数一遍","arr"],
+"bad-array-method-on-arguments":["对 arguments 用数组方法，它不是真数组","arr"],
+"bad-min-max-func":["Math.min / Math.max 用法错，比如传数组没展开","arr"],
+"bad-replace-all-arg":["replaceAll 第一个参数传了非全局正则","arr"],
+"bad-match-all-arg":["matchAll 的参数不是全局正则","arr"],
+"no-new-array":["new Array() 的用法有歧义，new Array(3) 是长度不是元素","arr"],
+"no-useless-length-check":["多余的长度检查，这个值不可能为空","arr"],
+"no-useless-spread":["多余的展开，比如 [...arr] 只是复制一份","arr"],
+"no-useless-fallback-in-spread":["展开时多余的兜底，比如 ...(arr || [])","arr"],
+
+"no-async-promise-executor":["new Promise 的 executor 写成了 async，错误会被吞掉","async"],
+"no-floating-promises":["创建了 Promise 却没 await 也没 catch，出错没人知道","async"],
+"await-thenable":["await 了一个根本不是 Promise 的值","async"],
+"no-await-in-promise-methods":["在 Promise.all 的参数里直接 await，等于串行了","async"],
+"no-unnecessary-await":["多余的 await，这个值本来就是同步的","async"],
+"no-thenable":["普通对象上定义了 then 属性，会被当成 Promise 处理","async"],
+"no-single-promise-in-promise-methods":["Promise.all / race 只传了一个 Promise，没必要","async"],
+"no-implied-eval":["隐式 eval，比如 setTimeout(\"代码字符串\", 0)","async"],
+
+"restrict-template-expressions":["模板字符串里塞了非字符串值，对象会变成 [object Object]","ts"],
+"no-base-to-string":["对没有合适 toString 的对象做字符串化，结果没意义","ts"],
+"no-wrapper-object-types":["用 String / Number 包装类型，该用小写原始类型","ts"],
+"unbound-method":["把方法当值传出去，this 绑定丢了","ts"],
+"no-this-alias":["把 this 赋给别的变量，比如 const self = this","ts"],
+"no-extra-non-null-assertion":["多余的 !，比如 x!!","ts"],
+"no-non-null-asserted-optional-chain":["在 ?. 后面再加 !，自相矛盾","ts"],
+"prefer-as-const":["字面量类型断言可以写成 as const","ts"],
+"prefer-namespace-keyword":["用 module 关键字，该用 namespace","ts"],
+"triple-slash-reference":["用 /// <reference> 引入类型，该用 import","ts"],
+"no-misused-new":["接口里写 constructor，或类里写 new() 签名","ts"],
+"no-unsafe-declaration-merging":["同名接口和类合并，容易出现危险行为","ts"],
+"no-unsafe-unary-minus":["对非数字类型用一元负号","ts"],
+"no-useless-default-assignment":["参数默认值是多余的，类型里已经包含 undefined","ts"],
+"no-useless-empty-export":["空的 export {} 什么作用都没有","ts"],
+"no-unnecessary-parameter-property-assignment":["构造函数参数属性又手动赋了一次值","ts"],
+"no-misused-spread":["对不该展开的东西用展开，比如 [...someString]","ts"],
+"no-meaningless-void-operator":["void 用在了本来就是 void 的地方","ts"],
+"no-unsafe-optional-chaining":["在 ?. 的结果上直接运算，可能是 undefined","ts"],
+"prefer-string-starts-ends-with":["用 startsWith / endsWith 代替 indexOf 判断","ts"],
+
+"constructor-super":["派生类必须调 super()，非派生类不能调","cls"],
+"no-this-before-super":["在 super() 之前就用了 this","cls"],
+"getter-return":["getter 没有返回值，读出来永远是 undefined","cls"],
+"no-setter-return":["setter 里返回值，返回值会被忽略","cls"],
+
+"no-control-regex":["正则里包含控制字符","regex"],
+"no-invalid-regexp":["非法的正则表达式","regex"],
+"no-empty-character-class":["空的字符类 []，永远匹配不到东西","regex"],
+"no-misleading-character-class":["字符类里有 emoji 这类多码点字符，会误匹配","regex"],
+"no-useless-backreference":["正则里没起作用的反向引用","regex"],
+"no-useless-escape":["多余的转义，比如 \\a","regex"],
+"no-irregular-whitespace":["代码里混入了不可见的特殊空白字符","regex"],
+
+"no-useless-catch":["catch 里只是原样 throw，等于没写","err"],
+"no-unsafe-finally":["finally 里 return / throw，会吞掉 try 的返回值","err"],
+"missing-throw":["该抛错的地方没抛，错误被静默忽略","err"],
+
+"no-debugger":["代码里留下了 debugger 语句","danger"],
+"no-eval":["用了 eval","danger"],
+"no-with":["用了 with 语句","danger"],
+"no-caller":["用了 arguments.caller 或 arguments.callee","danger"],
+"no-iterator":["用了废弃的 __iterator__ 属性","danger"],
+"no-obj-calls":["把 Math / JSON 这类内置对象当函数调用","danger"],
+"no-new-native-nonconstructor":["对 Symbol / BigInt 用 new","danger"],
+"no-shadow-restricted-names":["用 undefined / NaN 这类受限名做变量名","danger"],
+
+"for-direction":["for 循环的更新方向写反了，会死循环","misc"],
+"require-yield":["generator 函数里一个 yield 都没有","misc"],
+"no-empty-pattern":["空的解构模式，比如 const {} = obj","misc"],
+"no-empty-static-block":["空的 static 初始化块","misc"],
+"no-loss-of-precision":["数字字面量超出精度，比如 9007199254740993","misc"],
+"no-nonoctal-decimal-escape":["用了 \\8 \\9 这种无效转义","misc"],
+"number-arg-out-of-range":["数字方法的参数越界，比如 toFixed(200)","misc"],
+"erasing-op":["无意义的运算，比如 x * 1 或 x + 0","misc"],
+"uninvoked-array-callback":["数组方法的回调没被真正调用","misc"],
+"no-invalid-fetch-options":["fetch 的 options 参数写错","misc"],
+"no-invalid-remove-event-listener":["removeEventListener 传了不同的函数引用，解绑无效","misc"],
+"no-useless-rename":["重命名 import / 解构时新旧名一模一样","misc"]
+};
+
+const EX = {
+"no-const-assign":["const a = 1;","a = 2;  // ✗ TypeError: Assignment to constant"],
+"no-class-assign":["class User {}","User = class {};  // ✗ 类名不能被重新赋值"],
+"no-func-assign":["function load() {}","load = () => {};  // ✗ 函数声明不能被覆盖"],
+"no-import-assign":["import { config } from './config';","config = {};  // ✗ import 绑定是只读的"],
+"no-global-assign":["undefined = 1;  // ✗ 只读全局变量，静默失败"],
+"no-ex-assign":["try { run(); } catch (e) {","  e = new Error('x');  // ✗ 覆盖了原始错误","}"],
+"no-self-assign":["let x = 1;","x = x;  // ✗ 什么也没做"],
+"no-unassigned-vars":["let total;  // ✗ 声明了但从来没有赋过值","console.log(total);"],
+"no-delete-var":["let x = 1;","delete x;  // ✗ 对变量无效，静默失败"],
+
+"no-unused-vars":["function calc(a, b) {","  return a;  // ✗ b 从没被用到","}","const unused = 42;  // ✗ 也没被用到"],
+"no-unreachable":["function f() {","  return 1;","  console.log('never');  // ✗ 永远跑不到","}"],
+"no-unused-labels":["loop: for (const i of [1, 2]) {","  break;  // ✗ 标签 loop 没用上","}"],
+"no-unused-private-class-members":["class A {","  #secret = 1;  // ✗ 私有字段从没被读取","}"],
+"no-unused-expressions":["function f(a, b) {","  a + b;  // ✗ 算完就丢了","}"],
+"only-used-in-recursion":["function walk(node, ctx) {","  if (!node) return;","  walk(node.next, ctx);  // ✗ ctx 只是原样往下传","}"],
+"no-empty-file":["// 整个文件只有这一行注释"],
+
+"no-cond-assign":["let found;","if (found = search()) {  // ✗ = 写成了 ==","  use(found);","}"],
+"no-constant-condition":["if (true) { run(); }  // ✗ 条件恒定","while (1) { tick(); }  // ✗ 永远为真"],
+"no-constant-binary-expression":["if (x === x) {  // ✗ 恒为 true，等于没判断","}"],
+"no-compare-neg-zero":["if (value === -0) {  // ✗ 0 也会命中，区分不了","}"],
+"use-isnan":["if (result === NaN) {  // ✗ 永远 false","}"],
+"valid-typeof":["if (typeof x === 'strnig') {  // ✗ 拼错了，永远 false","}"],
+"no-unsafe-negation":["if (!key in obj) {  // ✗ 实际是 (!key) in obj","}"],
+"bad-comparison-sequence":["if (a < b < c) {  // ✗ 实际是 (a<b) < c，永远 true","}"],
+"double-comparisons":["if (x === 1 || x === 1) {  // ✗ 后半句是多余的","}"],
+"const-comparisons":["if (1 < 2) {  // ✗ 两个常量比较，结果恒定","}"],
+"bad-object-literal-comparison":["if (obj === {}) {  // ✗ 引用不同，永远 false","}"],
+"bad-char-at-comparison":["if (str.charAt(0) === 'abc') {  // ✗ 单字符不可能等于三个字符","}"],
+"no-extra-boolean-cast":["if (!!flag) {  // ✗ if 里本来就会转布尔","}"],
+
+"no-dupe-keys":["const user = {","  id: 1,","  id: 2,  // ✗ 后面的静默覆盖前面的","};"],
+"no-dupe-class-members":["class A {","  run() {}","  run() {}  // ✗ 重复定义","}"],
+"no-dupe-else-if":["if (a) {","} else if (b) {","} else if (a) {  // ✗ 和第一个条件重复","}"],
+"no-duplicate-case":["switch (x) {","  case 1: break;","  case 1: break;  // ✗ 永远进不来","}"],
+"no-duplicate-enum-values":["enum Status {","  Ok = 1,","  Fine = 1,  // ✗ 值重复，两者相等","}"],
+"no-duplicate-type-constituents":["type T = string | string;  // ✗ 重复成员"],
+"no-redundant-type-constituents":["type T = string | 'a';  // ✗ 'a' 已被 string 覆盖"],
+
+"no-sparse-arrays":["const a = [1, , 3];  // ✗ 中间有个空洞"],
+"no-array-delete":["const a = [1, 2, 3];","delete a[1];  // ✗ 留下空洞，该用 splice(1, 1)"],
+"no-for-in-array":["for (const i in arr) {  // ✗ i 是字符串下标，还会遍历原型链","}"],
+"require-array-sort-compare":["[10, 9, 1].sort();  // ✗ 按字符串排，得到 [1, 10, 9]"],
+"prefer-set-size":["let n = 0;","for (const _ of set) n++;  // ✗ 直接用 set.size"],
+"bad-array-method-on-arguments":["function f() {","  return arguments.map((x) => x);  // ✗ arguments 没有 map","}"],
+"bad-min-max-func":["Math.max([1, 2, 3]);  // ✗ 得到 NaN，该写 Math.max(...arr)"],
+"bad-replace-all-arg":["'a-b-c'.replaceAll(/-/, '_');  // ✗ 非全局正则会抛错"],
+"bad-match-all-arg":["'a1b2'.matchAll(/\\d/);  // ✗ 必须带 g 标志"],
+"no-new-array":["new Array(3);  // ✗ 是长度 3 还是 [3]？有歧义"],
+"no-useless-length-check":["if (arr.length > 0 && arr[0]) {  // ✗ 前半句是多余的","}"],
+"no-useless-spread":["for (const x of [...arr]) {  // ✗ 遍历不需要先复制一份","}"],
+"no-useless-fallback-in-spread":["const all = [...(arr || [])];  // ✗ arr 一定已经是数组"],
+
+"no-async-promise-executor":["new Promise(async (resolve) => {  // ✗ 抛出的错误会被吞掉","  await load();","  resolve();","});"],
+"no-floating-promises":["function onClick() {","  save(data);  // ✗ 没 await 也没 catch，出错没人知道","}"],
+"await-thenable":["const n = await 42;  // ✗ 42 不是 Promise"],
+"no-await-in-promise-methods":["await Promise.all([await a(), await b()]);  // ✗ 变成串行了"],
+"no-unnecessary-await":["const first = await arr[0];  // ✗ 同步取值，await 多余"],
+"no-thenable":["const obj = { then: () => {} };  // ✗ 会被当成 Promise 处理"],
+"no-single-promise-in-promise-methods":["await Promise.all([fetchOne()]);  // ✗ 只有一个，直接 await 即可"],
+"no-implied-eval":["setTimeout('doWork()', 100);  // ✗ 字符串会被当代码执行"],
+
+"restrict-template-expressions":["const msg = `user: ${user}`;  // ✗ 对象会变成 [object Object]"],
+"no-base-to-string":["String(new Map());  // ✗ 得到 \"[object Map]\"，没有意义"],
+"no-wrapper-object-types":["function f(x: String) {}  // ✗ 该用小写 string"],
+"unbound-method":["const fn = obj.method;  // ✗ this 丢了","fn();  // TypeError"],
+"no-this-alias":["function init() {","  const self = this;  // ✗ 该用箭头函数或 bind","}"],
+"no-extra-non-null-assertion":["const v = obj!!.value;  // ✗ 第二个 ! 是多余的"],
+"no-non-null-asserted-optional-chain":["const v = obj?.a!;  // ✗ ?. 之后再加 ! 自相矛盾"],
+"prefer-as-const":["const mode = 'dark' as 'dark';  // ✗ 该写 as const"],
+"prefer-namespace-keyword":["module Utils {  // ✗ 该用 namespace","}"],
+"triple-slash-reference":["/// <reference path=\"./types.d.ts\" />  // ✗ 该用 import"],
+"no-misused-new":["interface A {","  new (): A;  // ✗ 接口里写构造签名，容易误解","}"],
+"no-unsafe-declaration-merging":["class A {}","interface A { x: number }  // ✗ 同名合并，容易出现危险行为"],
+"no-unsafe-unary-minus":["const n = -someString;  // ✗ 得到 NaN"],
+"no-useless-default-assignment":["function f(x = undefined) {}  // ✗ 默认值什么也没做"],
+"no-useless-empty-export":["export {};  // ✗ 什么也没导出"],
+"no-unnecessary-parameter-property-assignment":["class A {","  constructor(private x: number) {","    this.x = x;  // ✗ 参数属性已经自动赋过了","  }","}"],
+"no-misused-spread":["const o = { ...'abc' };  // ✗ 得到 {0:'a', 1:'b', 2:'c'}"],
+"no-meaningless-void-operator":["void console.log('x');  // ✗ 它本来就返回 void"],
+"no-unsafe-optional-chaining":["const total = obj?.count + 1;  // ✗ obj 为空时得到 NaN"],
+"prefer-string-starts-ends-with":["if (url.indexOf('http') === 0) {  // ✗ 该用 startsWith","}"],
+
+"constructor-super":["class A extends B {","  constructor() {","    // ✗ 少了 super()","  }","}"],
+"no-this-before-super":["class A extends B {","  constructor() {","    this.x = 1;  // ✗ super() 之前不能用 this","    super();","  }","}"],
+"getter-return":["class A {","  get name() {","    const n = 'x';  // ✗ 没有 return，读出来是 undefined","  }","}"],
+"no-setter-return":["class A {","  set name(v) {","    return v;  // ✗ setter 的返回值会被忽略","  }","}"],
+
+"no-control-regex":["const re = /\\x1f/;  // ✗ 正则里包含控制字符"],
+"no-invalid-regexp":["new RegExp('[');  // ✗ 非法正则，会抛 SyntaxError"],
+"no-empty-character-class":["const re = /[]/;  // ✗ 空字符类，永远匹配不到"],
+"no-misleading-character-class":["const re = /[👍]/;  // ✗ emoji 是多码点，这样写会误匹配"],
+"no-useless-backreference":["const re = /(?:\\1)/;  // ✗ 引用不到任何分组"],
+"no-useless-escape":["const re = /\\a/;  // ✗ \\a 不是有效转义"],
+"no-irregular-whitespace":["const x = 1;　// ✗ 行尾是全角空格 U+3000"],
+
+"no-useless-catch":["try {","  run();","} catch (e) {","  throw e;  // ✗ 什么也没做，等于没写 catch","}"],
+"no-unsafe-finally":["function f() {","  try {","    return 1;","  } finally {","    return 2;  // ✗ 吞掉了前面的 return 1","  }","}"],
+"missing-throw":["function check(x) {","  if (!x) {","    new Error('invalid');  // ✗ 创建了错误但没 throw","  }","}"],
+
+"no-debugger":["function f() {","  debugger;  // ✗ 提交前忘了删","}"],
+"no-eval":["eval('alert(1)');  // ✗ 任意代码执行"],
+"no-with":["with (obj) {  // ✗ 作用域不可预测","  x = 1;","}"],
+"no-caller":["function f() {","  return arguments.callee;  // ✗ 严格模式直接抛错","}"],
+"no-iterator":["obj.__iterator__ = function () {};  // ✗ 已废弃的旧协议"],
+"no-obj-calls":["Math();  // ✗ Math 不是函数，会抛 TypeError"],
+"no-new-native-nonconstructor":["new Symbol('x');  // ✗ Symbol 不能 new"],
+"no-shadow-restricted-names":["function f(undefined) {  // ✗ 覆盖了 undefined","}"],
+
+"for-direction":["for (let i = 0; i < 10; i--) {  // ✗ 方向反了，死循环","}"],
+"require-yield":["function* gen() {","  return 1;  // ✗ 一个 yield 都没有，那就不该用 generator","}"],
+"no-empty-pattern":["const {} = obj;  // ✗ 什么都没取出来","const [] = arr;  // ✗ 同理"],
+"no-empty-static-block":["class A {","  static { }  // ✗ 空的初始化块","}"],
+"no-loss-of-precision":["const big = 9007199254740993;  // ✗ 实际存成 9007199254740992"],
+"no-nonoctal-decimal-escape":["const s = '\\8';  // ✗ \\8 不是有效转义"],
+"number-arg-out-of-range":["(1.5).toFixed(200);  // ✗ 参数超出 0–100，会抛 RangeError"],
+"erasing-op":["const y = x * 1;  // ✗ 乘 1 什么也没做"],
+"uninvoked-array-callback":["arr.map(getValue());  // ✗ 传的是调用结果，不是函数"],
+"no-invalid-fetch-options":["fetch(url, { method: 'GET', body: 'x' });  // ✗ GET 不能带 body"],
+"no-invalid-remove-event-listener":["el.addEventListener('click', () => {});","el.removeEventListener('click', () => {});  // ✗ 不是同一个函数，解绑无效"],
+"no-useless-rename":["import { foo as foo } from './mod';  // ✗ 新旧名一样"]
+};
+
+const PLUGIN_LABEL = {"eslint":"eslint","typescript":"ts","oxc":"oxc","unicorn":"unicorn","import":"import","react":"react","jest":"jest","vitest":"vitest","jsdoc":"jsdoc","jsx-a11y":"a11y","nextjs":"next","react-perf":"react-perf","promise":"promise","node":"node","vue":"vue"};
+
+const RULES = (() => {
+  const map = new Map();
+  for (const s of RAW.split(";")) {
+    const [n,p,c,d,f] = s.split("~");
+    const hit = map.get(n);
+    if (!hit) {
+      map.set(n, {n, p, c, d:d==="1", f:f==="1", p2:null});
+    } else {
+      if (d === "1") hit.d = true;
+      if (f === "1") hit.f = true;
+      if (hit.p !== p) hit.p2 = hit.p2 || p;
+    }
+  }
+  return [...map.values()];
+})();
+const CATNAME = Object.fromEntries(CATS.map(c => [c[0], c[1]]));
+
+const elList = document.getElementById("list");
+const elCats = document.getElementById("cats");
+const elQ = document.getElementById("q");
+const elDef = document.getElementById("onlyDefault");
+const elFix = document.getElementById("onlyFix");
+const elCount = document.getElementById("count");
+let activeCat = null;
+
+function renderCats(){
+  elCats.innerHTML = CATS.map(([code,name,short,long]) => {
+    const total = RULES.filter(r => r.c === code).length;
+    const on = RULES.filter(r => r.c === code && r.d).length;
+    const meta = on ? `${total} 条 · 默认 ${on}` : `${total} 条 · 默认 0`;
+    return `<button class="cat" data-cat="${code}" aria-pressed="${activeCat===code}">
+      <div class="ct"><span class="cn">${name}</span><span class="cd">${meta}</span></div>
+      <div class="cx">${short}</div>
+    </button>`;
+  }).join("");
+}
+
+const esc = s => s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+let showEx = true;
+
+function rowHTML(r){
+  const zh = ZH[r.n];
+  const title = zh ? zh[0] : r.n;
+  const cls = zh ? "row" : "row raw";
+  const chips = [
+    `<code>${r.n}</code>`,
+    `<span class="chip">${PLUGIN_LABEL[r.p] || r.p}${r.p2 ? " · " + (PLUGIN_LABEL[r.p2] || r.p2) : ""}</span>`,
+    r.d ? `<span class="chip def">默认开启</span>` : "",
+    r.f ? `<span class="chip fix">可自动修复</span>` : ""
+  ].join("");
+  let code = "";
+  const lines = EX[r.n];
+  if (lines && showEx) {
+    const txt = esc(lines.join("\n")).replace(/(\/\/ ✗[^\n]*)/g, '<span class="bad">$1</span>');
+    code = `<pre class="ex">${txt}</pre>`;
+  }
+  return `<div class="${cls}"><div class="zh">${title}</div><div class="meta">${chips}</div>${code}</div>`;
+}
+
+function render(){
+  const q = elQ.value.trim().toLowerCase();
+  const onlyDef = elDef.checked;
+  const onlyFix = elFix.checked;
+
+  let rows = RULES.filter(r => {
+    if (activeCat && r.c !== activeCat) return false;
+    if (onlyDef && !r.d) return false;
+    if (onlyFix && !r.f) return false;
+    if (!q) return true;
+    const zh = ZH[r.n];
+    return r.n.toLowerCase().includes(q) || (zh && zh[0].toLowerCase().includes(q));
+  });
+
+  elCount.textContent = `显示 ${rows.length} / ${RULES.length} 条`;
+  if (!rows.length){
+    elList.innerHTML = `<div class="empty">没有匹配的规则。试试清掉搜索词，或者取消「只看默认开启」。</div>`;
+    return;
+  }
+
+  if (onlyDef){
+    let html = "";
+    for (const [key, title, desc] of SCENES){
+      const group = rows.filter(r => (ZH[r.n]?.[1] || "misc") === key);
+      if (!group.length) continue;
+      html += `<section class="scene"><h2>${title}<span class="n">${group.length} 条</span></h2><p>${desc}</p></section>`;
+      html += group.map(r => rowHTML(r)).join("");
+    }
+    elList.innerHTML = html;
+  } else {
+    let html = "";
+    for (const [code, name] of CATS){
+      const group = rows.filter(r => r.c === code);
+      if (!group.length) continue;
+      const known = group.filter(r => ZH[r.n]).length;
+      html += `<section class="scene"><h2>${name}<span class="n">${group.length} 条${known ? ` · ${known} 条有中文说明` : ""}</span></h2></section>`;
+      html += group.map(r => rowHTML(r)).join("");
+    }
+    elList.innerHTML = html;
+  }
+}
+
+elCats.addEventListener("click", e => {
+  const btn = e.target.closest(".cat");
+  if (!btn) return;
+  activeCat = activeCat === btn.dataset.cat ? null : btn.dataset.cat;
+  renderCats();
+  render();
+});
+elQ.addEventListener("input", render);
+elDef.addEventListener("change", render);
+elFix.addEventListener("change", render);
+document.getElementById("showEx").addEventListener("change", e => {
+  showEx = e.target.checked;
+  render();
+});
+
+renderCats();
+render();
+</script>
+</body>
+</html>
