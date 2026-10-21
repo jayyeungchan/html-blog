@@ -783,6 +783,28 @@ body {
 
 .prose img { border-radius: var(--radius); margin: 1.8em 0; }
 
+.prose figure.poster {
+  margin: 1.8em 0 2em;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .55rem;
+}
+.prose figure.poster img {
+  width: 232px;
+  max-width: 100%;
+  height: auto;
+  border: 1px solid var(--line-soft);
+  box-shadow: var(--shadow-sm);
+  border-radius: 10px;
+}
+.prose figure.poster figcaption {
+  font-family: var(--mono);
+  font-size: .75rem;
+  color: var(--ink-3);
+  letter-spacing: .02em;
+}
+
 .prose table {
   width: 100%;
   border-collapse: collapse;

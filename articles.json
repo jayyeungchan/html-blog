@@ -1,14 +1,14 @@
 {
-  "generatedAt": "2026-10-21T06:18:15.987Z",
+  "generatedAt": "2026-10-21T09:44:33.058Z",
   "site": {
     "title": "字里行间",
-    "description": "一个用 HTML 写成的博客。目录即分类，文件即文章。",
+    "description": "史书翻到第几页，代码就写到第几行。剩下的念头没处安放，就散在字里行间。",
     "author": "Kit",
     "url": "https://your-blog.onrender.com"
   },
   "stats": {
-    "articles": 5,
-    "categories": 3
+    "articles": 2,
+    "categories": 2
   },
   "sync": {
     "enabled": false,
@@ -19,101 +19,46 @@
   "categories": [
     {
       "name": "技术",
-      "count": 3,
-      "latest": "2026-10-20",
-      "latestTitle": "为什么这个博客不用框架"
-    },
-    {
-      "name": "生活",
       "count": 1,
-      "latest": "2026-09-28",
-      "latestTitle": "我的 2026 阅读清单"
+      "latest": "2026-10-21",
+      "latestTitle": "oxlint 规则地图"
     },
     {
       "name": "随笔",
       "count": 1,
-      "latest": "2026-09-15",
-      "latestTitle": "关于慢下来"
+      "latest": "2026-10-21",
+      "latestTitle": "我的 2026 中国影视前十"
     }
   ],
   "articles": [
     {
-      "title": "为什么这个博客不用框架",
-      "url": "%E6%8A%80%E6%9C%AF/%E4%B8%BA%E4%BB%80%E4%B9%88%E8%BF%99%E4%B8%AA%E5%8D%9A%E5%AE%A2%E4%B8%8D%E7%94%A8%E6%A1%86%E6%9E%B6.html",
-      "path": "技术/为什么这个博客不用框架.html",
-      "category": "技术",
-      "date": "2026-10-20",
-      "dateFromMeta": true,
-      "tags": [
-        "前端",
-        "工程取舍",
-        "性能"
-      ],
-      "excerpt": "不是反对框架，而是这篇博客的规模还配不上它的复杂度。记录一次「把工具链砍到只剩 HTML」的决定。",
-      "minutes": 2,
-      "words": 760
-    },
-    {
-      "title": "静态博客是怎么跑起来的",
-      "url": "%E6%8A%80%E6%9C%AF/%E9%9D%99%E6%80%81%E5%8D%9A%E5%AE%A2%E6%98%AF%E6%80%8E%E4%B9%88%E8%B7%91%E8%B5%B7%E6%9D%A5%E7%9A%84.html",
-      "path": "技术/静态博客是怎么跑起来的.html",
-      "category": "技术",
-      "date": "2026-10-18",
-      "dateFromMeta": true,
-      "tags": [
-        "静态站点",
-        "Render",
-        "构建"
-      ],
-      "excerpt": "从目录到首页列表，完整拆解这套方案：目录即分类、文件名即标题、构建脚本只做一次翻译。",
-      "minutes": 3,
-      "words": 844
-    },
-    {
-      "title": "用 Grid 写一张响应式卡片墙",
-      "url": "%E6%8A%80%E6%9C%AF/%E7%94%A8Grid%E5%86%99%E5%93%8D%E5%BA%94%E5%BC%8F%E5%8D%A1%E7%89%87%E5%A2%99.html",
-      "path": "技术/用Grid写响应式卡片墙.html",
-      "category": "技术",
-      "date": "2026-10-12",
-      "dateFromMeta": true,
-      "tags": [
-        "CSS",
-        "布局",
-        "响应式"
-      ],
-      "excerpt": "不用媒体查询也能自适应：auto-fill 与 minmax 的组合，以及什么时候仍然需要断点。",
-      "minutes": 2,
-      "words": 553
-    },
-    {
-      "title": "我的 2026 阅读清单",
-      "url": "%E7%94%9F%E6%B4%BB/%E6%88%91%E7%9A%842026%E9%98%85%E8%AF%BB%E6%B8%85%E5%8D%95.html",
-      "path": "生活/我的2026阅读清单.html",
-      "category": "生活",
-      "date": "2026-09-28",
-      "dateFromMeta": true,
-      "tags": [
-        "阅读",
-        "清单"
-      ],
-      "excerpt": "今年读得最慢的三本书，两本中途放弃的，以及一条越来越确定的选书标准。",
-      "minutes": 2,
-      "words": 634
-    },
-    {
-      "title": "关于慢下来",
-      "url": "%E9%9A%8F%E7%AC%94/%E5%85%B3%E4%BA%8E%E6%85%A2%E4%B8%8B%E6%9D%A5.html",
-      "path": "随笔/关于慢下来.html",
+      "title": "我的 2026 中国影视前十",
+      "url": "%E9%9A%8F%E7%AC%94/%E6%88%91%E7%9A%842026%E4%B8%AD%E5%9B%BD%E5%BD%B1%E8%A7%86%E5%89%8D%E5%8D%81.html",
+      "path": "随笔/我的2026中国影视前十.html",
       "category": "随笔",
-      "date": "2026-09-15",
+      "date": "2026-10-21",
       "dateFromMeta": true,
       "tags": [
         "随笔",
-        "注意力"
+        "电影",
+        "电视剧",
+        "年度盘点"
       ],
-      "excerpt": "把一件事做慢，是我今年学到的最有用的技能。它不浪漫，只是把注意力从别处收回来。",
-      "minutes": 2,
-      "words": 580
+      "excerpt": "十月中旬把票房、豆瓣和收视翻了一遍，挑出今年我愿意推荐给别人的五部电影和五部剧集，附上我的排序理由。",
+      "minutes": 7,
+      "words": 2422
+    },
+    {
+      "title": "oxlint 规则地图",
+      "url": "%E6%8A%80%E6%9C%AF/oxlint%20%E8%A7%84%E5%88%99%E5%9C%B0%E5%9B%BE.html",
+      "path": "技术/oxlint 规则地图.html",
+      "category": "技术",
+      "date": "2026-10-21",
+      "dateFromMeta": false,
+      "tags": [],
+      "excerpt": "官方统计 871 条规则，去掉同名不同插件的重复实现后是 808 个唯一规则名；其中默认只有 111 条 在跑。这 111 条每条都配了 中文说明 + 一段反例代码 ，按「它在防什么事故」分成 12 组。可以直接搜「未使…",
+      "minutes": 1,
+      "words": 194
     }
   ]
 }

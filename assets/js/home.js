@@ -60,7 +60,7 @@ async function syncFromGitHub(cfg) {
 function renderSite() {
   const { title, description, author } = state.site;
   if (title) {
-    document.title = `${title} · 目录即分类的静态博客`;
+    document.title = `${title} · 灯下独记`;
     document.querySelectorAll('[data-site-title]').forEach((n) => (n.textContent = title));
   }
   if (description) {
