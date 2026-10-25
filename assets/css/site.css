@@ -612,6 +612,7 @@ body {
 }
 .footer-inner a { color: var(--ink-2); border-bottom: 1px solid var(--line); }
 .footer-inner a:hover { color: var(--accent); border-color: var(--accent); }
+.footer-links { display: inline-flex; align-items: center; gap: .9rem; flex-wrap: wrap; }
 .footer-mono { font-family: var(--mono); font-size: .6875rem; letter-spacing: .04em; }
 
 /* ============================ 11. Article page ========================== */

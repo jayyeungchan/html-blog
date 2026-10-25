@@ -1,27 +1,27 @@
 {
-  "generatedAt": "2026-10-21T09:44:33.058Z",
+  "generatedAt": "2026-10-25T09:53:49.440Z",
   "site": {
     "title": "字里行间",
     "description": "史书翻到第几页，代码就写到第几行。剩下的念头没处安放，就散在字里行间。",
     "author": "Kit",
-    "url": "https://your-blog.onrender.com"
+    "url": "https://html-blog.onrender.com"
   },
   "stats": {
     "articles": 2,
     "categories": 2
   },
   "sync": {
-    "enabled": false,
-    "owner": "",
-    "repo": "",
+    "enabled": true,
+    "owner": "jayyeungchan",
+    "repo": "html-blog",
     "branch": "main"
   },
   "categories": [
     {
       "name": "技术",
       "count": 1,
-      "latest": "2026-10-21",
-      "latestTitle": "oxlint 规则地图"
+      "latest": "2026-10-25",
+      "latestTitle": "oxlint 规则地图：808 条规则，默认只开 111 条"
     },
     {
       "name": "随笔",
@@ -31,6 +31,23 @@
     }
   ],
   "articles": [
+    {
+      "title": "oxlint 规则地图：808 条规则，默认只开 111 条",
+      "url": "%E6%8A%80%E6%9C%AF/oxlint%20%E8%A7%84%E5%88%99%E5%9C%B0%E5%9B%BE.html",
+      "path": "技术/oxlint 规则地图.html",
+      "category": "技术",
+      "date": "2026-10-25",
+      "dateFromMeta": true,
+      "tags": [
+        "oxlint",
+        "代码质量",
+        "工具",
+        "前端"
+      ],
+      "excerpt": "把 npx oxlint --rules 的 871 行输出拆开数了一遍：去重后 808 条，默认开启 111 条，可自动修 214 条。808 段反例全覆盖，其中 111 条配了中文说明。",
+      "minutes": 4,
+      "words": 1277
+    },
     {
       "title": "我的 2026 中国影视前十",
       "url": "%E9%9A%8F%E7%AC%94/%E6%88%91%E7%9A%842026%E4%B8%AD%E5%9B%BD%E5%BD%B1%E8%A7%86%E5%89%8D%E5%8D%81.html",
@@ -47,18 +64,6 @@
       "excerpt": "十月中旬把票房、豆瓣和收视翻了一遍，挑出今年我愿意推荐给别人的五部电影和五部剧集，附上我的排序理由。",
       "minutes": 7,
       "words": 2422
-    },
-    {
-      "title": "oxlint 规则地图",
-      "url": "%E6%8A%80%E6%9C%AF/oxlint%20%E8%A7%84%E5%88%99%E5%9C%B0%E5%9B%BE.html",
-      "path": "技术/oxlint 规则地图.html",
-      "category": "技术",
-      "date": "2026-10-21",
-      "dateFromMeta": false,
-      "tags": [],
-      "excerpt": "官方统计 871 条规则，去掉同名不同插件的重复实现后是 808 个唯一规则名；其中默认只有 111 条 在跑。这 111 条每条都配了 中文说明 + 一段反例代码 ，按「它在防什么事故」分成 12 组。可以直接搜「未使…",
-      "minutes": 1,
-      "words": 194
     }
   ]
 }

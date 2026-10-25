@@ -1,0 +1,1228 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>oxlint 规则地图</title>
+<style>
+  :root{
+    --bg:#FBFAF7; --surface:#fff; --line:#E7E4DB; --line-soft:#F0EEE7;
+    --ink:#1F1F1D; --muted:#6B6A65; --faint:#96958F;
+    --accent:#185FA5; --accent-bg:#E6F1FB; --accent-ink:#0C447C;
+    --warn:#854F0B; --warn-bg:#FAEEDA; --ok:#0F6E56; --ok-bg:#E1F5EE;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    font-size:14px; line-height:1.6; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1000px; margin:0 auto; padding:44px 24px 80px}
+  header{margin-bottom:28px}
+  .back{display:inline-block; margin-bottom:10px; font-size:12.5px; color:var(--muted); text-decoration:none; border-bottom:1px solid transparent}
+  .back:hover{color:var(--accent); border-color:currentColor}
+  h1{font-size:24px; font-weight:600; margin:0 0 8px; letter-spacing:-.01em}
+  .lede{color:var(--muted); margin:0; max-width:660px}
+  .lede b{color:var(--ink); font-weight:600}
+  .kpis{display:flex; gap:26px; margin-top:18px; flex-wrap:wrap}
+  .kpi .v{font-size:22px; font-weight:600; line-height:1.2}
+  .kpi .k{font-size:12px; color:var(--faint)}
+
+  .cats{display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:10px; margin:26px 0 22px}
+  .cat{
+    text-align:left; background:var(--surface); border:1px solid var(--line);
+    border-radius:12px; padding:13px 14px; cursor:pointer; font:inherit; color:inherit;
+    transition:border-color .12s, background .12s;
+  }
+  .cat:hover{border-color:#CFCBC0}
+  .cat[aria-pressed="true"]{border-color:var(--accent); background:var(--accent-bg)}
+  .cat .ct{display:flex; align-items:baseline; justify-content:space-between; gap:8px; margin-bottom:4px}
+  .cat .cn{font-weight:600; font-size:14px}
+  .cat .cd{font-size:11.5px; color:var(--faint); font-variant-numeric:tabular-nums}
+  .cat .cx{font-size:12px; color:var(--muted); line-height:1.5}
+  .cat[aria-pressed="true"] .cx{color:var(--accent-ink)}
+
+  .toolbar{
+    position:sticky; top:0; z-index:5; background:var(--bg);
+    padding:12px 0; border-bottom:1px solid var(--line); margin-bottom:8px;
+    display:flex; gap:14px; align-items:center; flex-wrap:wrap;
+  }
+  #q{
+    flex:1 1 260px; min-width:200px; padding:9px 12px; font:inherit; font-size:13.5px;
+    border:1px solid var(--line); border-radius:9px; background:var(--surface); color:var(--ink);
+  }
+  #q:focus{outline:2px solid var(--accent-bg); border-color:var(--accent)}
+  .tg{display:inline-flex; align-items:center; gap:6px; font-size:13px; color:var(--muted); cursor:pointer; user-select:none}
+  .tg input{accent-color:var(--accent); margin:0; width:14px; height:14px}
+  #count{font-size:12.5px; color:var(--faint); margin-left:auto; font-variant-numeric:tabular-nums}
+
+  .scene{margin:26px 0 4px}
+  .scene h2{font-size:15px; font-weight:600; margin:0 0 2px; display:flex; align-items:center; gap:8px}
+  .scene h2 .n{font-size:11.5px; font-weight:400; color:var(--faint)}
+  .scene p{margin:0; font-size:12.5px; color:#7C7B75; margin-bottom:6px}
+
+  .row{padding:11px 0; border-bottom:1px solid var(--line-soft)}
+  .row:last-child{border-bottom:none}
+  .zh{font-size:13.8px; margin-bottom:3px}
+  .meta{display:flex; align-items:center; gap:7px; flex-wrap:wrap; font-size:11.5px; color:var(--faint)}
+  .meta code{font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,monospace; font-size:12px; color:var(--muted)}
+  .chip{font-size:10.5px; padding:1px 6px; border-radius:999px; border:1px solid var(--line); color:var(--faint)}
+  .chip.def{border-color:#B5D4F4; background:var(--accent-bg); color:var(--accent-ink)}
+  .chip.fix{border-color:#9FE1CB; background:var(--ok-bg); color:var(--ok)}
+  .raw .zh{font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,monospace; font-size:12.5px; color:var(--muted)}
+  .ex{
+    margin:8px 0 2px; padding:9px 11px; background:#F7F5F0;
+    border:1px solid var(--line-soft); border-radius:7px; overflow-x:auto;
+    font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,monospace;
+    font-size:12px; line-height:1.7; color:#3A3A36; white-space:pre; margin-bottom:0;
+  }
+  .ex .bad{color:#A32D2D}
+  .empty{padding:40px 0; color:var(--faint); text-align:center}
+  footer{margin-top:44px; padding-top:18px; border-top:1px solid var(--line); font-size:12px; color:var(--faint)}
+  footer code{font-family:ui-monospace,Menlo,monospace; background:var(--surface); padding:1px 5px; border-radius:4px; border:1px solid var(--line)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <a class="back" href="/">← 字里行间</a>
+    <h1>oxlint 规则地图</h1>
+    <p class="lede">官方统计 871 条规则，去掉同名不同插件的重复实现后是 <b>808</b> 个唯一规则名；其中默认只有 <b>111 条</b>在跑。<b>反例代码覆盖全部 808 条</b>，默认开启的 111 条另配中文说明，并按「它在防什么事故」分成 12 组。可以直接搜「未使用」「promise」「a11y」这类词。</p>
+    <div class="kpis">
+      <div class="kpi"><div class="v">808</div><div class="k">唯一规则名</div></div>
+      <div class="kpi"><div class="v">111</div><div class="k">默认开启</div></div>
+      <div class="kpi"><div class="v">7</div><div class="k">类别</div></div>
+      <div class="kpi"><div class="v">1.89.0</div><div class="k">实测版本</div></div>
+    </div>
+  </header>
+
+  <section class="cats" id="cats"></section>
+
+  <div class="toolbar">
+    <input id="q" type="search" placeholder="搜中文说明或规则名，例如：未使用 / promise / no-unused">
+    <label class="tg"><input type="checkbox" id="onlyDefault" checked> 只看默认开启</label>
+    <label class="tg"><input type="checkbox" id="onlyFix"> 只看可自动修复</label>
+    <label class="tg"><input type="checkbox" id="showEx" checked> 显示反例</label>
+    <span id="count"></span>
+  </div>
+
+  <main id="list"></main>
+
+  <footer>
+    数据来自 <code>npx oxlint --rules</code> 的真实输出解析（871 行），已按规则名去重为 808 条。反例代码为人工撰写，覆盖全部 <b id="fCovered">0</b> 条规则；中文说明覆盖默认开启的 111 条。
+    <br>官方规则文档：<code>oxc.rs/docs/guide/usage/linter/rules</code>
+  </footer>
+</div>
+
+<script>
+const RAW = "constructor-super~eslint~cor~1~0;for-direction~eslint~cor~1~1;getter-return~eslint~cor~1~0;no-async-promise-executor~eslint~cor~1~0;no-caller~eslint~cor~1~0;no-class-assign~eslint~cor~1~0;no-compare-neg-zero~eslint~cor~1~1;no-cond-assign~eslint~cor~1~0;no-const-assign~eslint~cor~1~0;no-constant-binary-expression~eslint~cor~1~0;no-constant-condition~eslint~cor~1~0;no-control-regex~eslint~cor~1~0;no-debugger~eslint~cor~1~0;no-delete-var~eslint~cor~1~0;no-dupe-class-members~eslint~cor~1~0;no-dupe-else-if~eslint~cor~1~0;no-dupe-keys~eslint~cor~1~0;no-duplicate-case~eslint~cor~1~0;no-empty-character-class~eslint~cor~1~0;no-empty-pattern~eslint~cor~1~0;no-empty-static-block~eslint~cor~1~0;no-eval~eslint~cor~1~0;no-ex-assign~eslint~cor~1~0;no-extra-boolean-cast~eslint~cor~1~1;no-func-assign~eslint~cor~1~0;no-global-assign~eslint~cor~1~0;no-import-assign~eslint~cor~1~0;no-invalid-regexp~eslint~cor~1~0;no-irregular-whitespace~eslint~cor~1~0;no-iterator~eslint~cor~1~0;no-loss-of-precision~eslint~cor~1~0;no-misleading-character-class~eslint~cor~1~0;no-new-native-nonconstructor~eslint~cor~1~0;no-nonoctal-decimal-escape~eslint~cor~1~0;no-obj-calls~eslint~cor~1~0;no-self-assign~eslint~cor~1~0;no-setter-return~eslint~cor~1~0;no-shadow-restricted-names~eslint~cor~1~0;no-sparse-arrays~eslint~cor~1~0;no-this-before-super~eslint~cor~1~0;no-unassigned-vars~eslint~cor~1~0;no-unreachable~eslint~cor~1~0;no-unsafe-finally~eslint~cor~1~0;no-unsafe-negation~eslint~cor~1~1;no-unsafe-optional-chaining~eslint~cor~1~0;no-unused-expressions~eslint~cor~1~0;no-unused-labels~eslint~cor~1~1;no-unused-private-class-members~eslint~cor~1~0;no-unused-vars~eslint~cor~1~1;no-useless-backreference~eslint~cor~1~0;no-useless-catch~eslint~cor~1~0;no-useless-escape~eslint~cor~1~1;no-useless-rename~eslint~cor~1~1;no-with~eslint~cor~1~0;require-yield~eslint~cor~1~0;use-isnan~eslint~cor~1~1;valid-typeof~eslint~cor~1~1;default~import~cor~0~0;namespace~import~cor~0~0;expect-expect~jest~cor~0~0;no-conditional-expect~jest~cor~0~0;no-disabled-tests~jest~cor~0~0;no-export~jest~cor~0~0;no-focused-tests~jest~cor~0~0;no-standalone-expect~jest~cor~0~0;prefer-snapshot-hint~jest~cor~0~0;require-to-throw-message~jest~cor~0~0;valid-describe-callback~jest~cor~0~0;valid-expect~jest~cor~0~0;valid-expect-in-promise~jest~cor~0~0;valid-title~jest~cor~0~1;check-property-names~jsdoc~cor~0~0;check-tag-names~jsdoc~cor~0~0;implements-on-classes~jsdoc~cor~0~0;no-defaults~jsdoc~cor~0~0;require-property~jsdoc~cor~0~0;require-property-description~jsdoc~cor~0~0;require-property-name~jsdoc~cor~0~0;require-property-type~jsdoc~cor~0~0;require-yields~jsdoc~cor~0~0;alt-text~jsx_a11y~cor~0~0;anchor-has-content~jsx_a11y~cor~0~0;anchor-is-valid~jsx_a11y~cor~0~0;aria-activedescendant-has-tabindex~jsx_a11y~cor~0~0;aria-props~jsx_a11y~cor~0~1;aria-proptypes~jsx_a11y~cor~0~0;aria-role~jsx_a11y~cor~0~0;aria-unsupported-elements~jsx_a11y~cor~0~1;autocomplete-valid~jsx_a11y~cor~0~0;click-events-have-key-events~jsx_a11y~cor~0~0;control-has-associated-label~jsx_a11y~cor~0~0;heading-has-content~jsx_a11y~cor~0~0;html-has-lang~jsx_a11y~cor~0~0;iframe-has-title~jsx_a11y~cor~0~0;img-redundant-alt~jsx_a11y~cor~0~0;interactive-supports-focus~jsx_a11y~cor~0~0;label-has-associated-control~jsx_a11y~cor~0~0;lang~jsx_a11y~cor~0~0;media-has-caption~jsx_a11y~cor~0~0;mouse-events-have-key-events~jsx_a11y~cor~0~0;no-access-key~jsx_a11y~cor~0~0;no-aria-hidden-on-focusable~jsx_a11y~cor~0~1;no-autofocus~jsx_a11y~cor~0~0;no-distracting-elements~jsx_a11y~cor~0~0;no-interactive-element-to-noninteractive-role~jsx_a11y~cor~0~0;no-noninteractive-element-interactions~jsx_a11y~cor~0~0;no-noninteractive-element-to-interactive-role~jsx_a11y~cor~0~0;no-noninteractive-tabindex~jsx_a11y~cor~0~0;no-redundant-roles~jsx_a11y~cor~0~1;no-static-element-interactions~jsx_a11y~cor~0~0;prefer-tag-over-role~jsx_a11y~cor~0~0;role-has-required-aria-props~jsx_a11y~cor~0~0;role-supports-aria-props~jsx_a11y~cor~0~0;scope~jsx_a11y~cor~0~1;tabindex-no-positive~jsx_a11y~cor~0~0;google-font-display~nextjs~cor~0~0;google-font-preconnect~nextjs~cor~0~0;inline-script-id~nextjs~cor~0~0;next-script-for-ga~nextjs~cor~0~0;no-assign-module-variable~nextjs~cor~0~0;no-async-client-component~nextjs~cor~0~0;no-before-interactive-script-outside-document~nextjs~cor~0~0;no-css-tags~nextjs~cor~0~0;no-document-import-in-page~nextjs~cor~0~0;no-duplicate-head~nextjs~cor~0~0;no-head-element~nextjs~cor~0~0;no-head-import-in-document~nextjs~cor~0~0;no-html-link-for-pages~nextjs~cor~0~0;no-img-element~nextjs~cor~0~0;no-page-custom-font~nextjs~cor~0~0;no-script-component-in-head~nextjs~cor~0~0;no-styled-jsx-in-document~nextjs~cor~0~0;no-sync-scripts~nextjs~cor~0~0;no-title-in-document-head~nextjs~cor~0~0;no-typos~nextjs~cor~0~0;no-unwanted-polyfillio~nextjs~cor~0~0;bad-array-method-on-arguments~oxc~cor~1~0;bad-char-at-comparison~oxc~cor~1~0;bad-comparison-sequence~oxc~cor~1~0;bad-match-all-arg~oxc~cor~1~0;bad-min-max-func~oxc~cor~1~0;bad-object-literal-comparison~oxc~cor~1~0;bad-replace-all-arg~oxc~cor~1~0;const-comparisons~oxc~cor~1~0;double-comparisons~oxc~cor~1~0;erasing-op~oxc~cor~1~1;missing-throw~oxc~cor~1~0;number-arg-out-of-range~oxc~cor~1~0;only-used-in-recursion~oxc~cor~1~1;uninvoked-array-callback~oxc~cor~1~0;no-callback-in-promise~promise~cor~0~0;no-new-statics~promise~cor~0~1;valid-params~promise~cor~0~0;error-boundaries~react~cor~0~0;exhaustive-deps~react~cor~0~1;forward-ref-uses-ref~react~cor~0~0;globals~react~cor~0~0;immutability~react~cor~0~0;incompatible-library~react~cor~0~0;jsx-key~react~cor~0~0;jsx-no-duplicate-props~react~cor~0~0;jsx-no-undef~react~cor~0~0;jsx-props-no-spread-multi~react~cor~0~1;no-children-prop~react~cor~0~0;no-danger-with-children~react~cor~0~0;no-did-mount-set-state~react~cor~0~0;no-did-update-set-state~react~cor~0~0;no-direct-mutation-state~react~cor~0~0;no-find-dom-node~react~cor~0~0;no-is-mounted~react~cor~0~0;no-render-return-value~react~cor~0~0;no-string-refs~react~cor~0~0;no-this-in-sfc~react~cor~0~0;no-unsafe~react~cor~0~0;no-will-update-set-state~react~cor~0~0;preserve-manual-memoization~react~cor~0~0;purity~react~cor~0~0;refs~react~cor~0~0;set-state-in-effect~react~cor~0~0;set-state-in-render~react~cor~0~0;static-components~react~cor~0~0;use-memo~react~cor~0~0;void-dom-elements-no-children~react~cor~0~0;void-use-memo~react~cor~0~0;await-thenable~typescript~cor~1~0;no-array-delete~typescript~cor~1~0;no-base-to-string~typescript~cor~1~0;no-duplicate-enum-values~typescript~cor~1~0;no-duplicate-type-constituents~typescript~cor~1~1;no-extra-non-null-assertion~typescript~cor~1~1;no-floating-promises~typescript~cor~1~0;no-for-in-array~typescript~cor~1~0;no-implied-eval~typescript~cor~1~0;no-meaningless-void-operator~typescript~cor~1~1;no-misused-new~typescript~cor~1~0;no-misused-spread~typescript~cor~1~0;no-non-null-asserted-optional-chain~typescript~cor~1~0;no-redundant-type-constituents~typescript~cor~1~0;no-this-alias~typescript~cor~1~0;no-unnecessary-parameter-property-assignment~typescript~cor~1~0;no-unsafe-declaration-merging~typescript~cor~1~0;no-unsafe-unary-minus~typescript~cor~1~0;no-useless-default-assignment~typescript~cor~1~0;no-useless-empty-export~typescript~cor~1~1;no-wrapper-object-types~typescript~cor~1~1;prefer-as-const~typescript~cor~1~1;prefer-namespace-keyword~typescript~cor~1~1;require-array-sort-compare~typescript~cor~1~0;restrict-template-expressions~typescript~cor~1~0;triple-slash-reference~typescript~cor~1~0;unbound-method~typescript~cor~1~0;no-await-in-promise-methods~unicorn~cor~1~0;no-empty-file~unicorn~cor~1~0;no-invalid-fetch-options~unicorn~cor~1~0;no-invalid-remove-event-listener~unicorn~cor~1~0;no-new-array~unicorn~cor~1~0;no-single-promise-in-promise-methods~unicorn~cor~1~1;no-thenable~unicorn~cor~1~0;no-unnecessary-await~unicorn~cor~1~1;no-useless-fallback-in-spread~unicorn~cor~1~1;no-useless-length-check~unicorn~cor~1~0;no-useless-spread~unicorn~cor~1~1;prefer-set-size~unicorn~cor~1~1;prefer-string-starts-ends-with~unicorn~cor~1~1;expect-expect~vitest~cor~0~0;hoisted-apis-on-top~vitest~cor~0~0;no-conditional-expect~vitest~cor~0~0;no-conditional-tests~vitest~cor~0~0;no-disabled-tests~vitest~cor~0~0;no-focused-tests~vitest~cor~0~0;no-standalone-expect~vitest~cor~0~0;prefer-snapshot-hint~vitest~cor~0~0;require-awaited-expect-poll~vitest~cor~0~0;require-local-test-context-for-concurrent-snapshots~vitest~cor~0~0;require-mock-type-parameters~vitest~cor~0~0;require-to-throw-message~vitest~cor~0~0;valid-describe-callback~vitest~cor~0~0;valid-expect~vitest~cor~0~0;valid-expect-in-promise~vitest~cor~0~0;valid-title~vitest~cor~0~1;warn-todo~vitest~cor~0~0;no-arrow-functions-in-watch~vue~cor~0~0;no-async-in-computed-properties~vue~cor~0~0;no-computed-properties-in-data~vue~cor~0~0;no-deprecated-data-object-declaration~vue~cor~0~0;no-deprecated-delete-set~vue~cor~0~0;no-deprecated-destroyed-lifecycle~vue~cor~0~1;no-deprecated-events-api~vue~cor~0~0;no-deprecated-model-definition~vue~cor~0~0;no-deprecated-props-default-this~vue~cor~0~0;no-deprecated-vue-config-keycodes~vue~cor~0~0;no-dupe-keys~vue~cor~0~0;no-export-in-script-setup~vue~cor~0~0;no-expose-after-await~vue~cor~0~0;no-lifecycle-after-await~vue~cor~0~0;no-reserved-component-names~vue~cor~0~0;no-reserved-keys~vue~cor~0~0;no-reserved-props~vue~cor~0~0;no-shared-component-data~vue~cor~0~0;no-side-effects-in-computed-properties~vue~cor~0~0;no-this-in-before-route-enter~vue~cor~0~0;no-watch-after-await~vue~cor~0~0;prefer-import-from-vue~vue~cor~0~1;require-prop-type-constructor~vue~cor~0~1;require-render-return~vue~cor~0~0;require-slots-as-functions~vue~cor~0~0;return-in-computed-property~vue~cor~0~0;return-in-emits-validator~vue~cor~0~0;valid-define-emits~vue~cor~0~0;valid-define-options~vue~cor~0~0;valid-define-props~vue~cor~0~0;valid-next-tick~vue~cor~0~1;no-await-in-loop~eslint~per~0~0;no-useless-call~eslint~per~0~0;no-accumulating-spread~oxc~per~0~0;no-map-spread~oxc~per~0~0;jsx-no-constructed-context-values~react~per~0~0;no-array-index-key~react~per~0~0;no-deriving-state-in-effects~react~per~0~0;no-object-type-as-default-prop~react~per~0~0;jsx-no-jsx-as-prop~react_perf~per~0~0;jsx-no-new-array-as-prop~react_perf~per~0~0;jsx-no-new-function-as-prop~react_perf~per~0~0;jsx-no-new-object-as-prop~react_perf~per~0~0;prefer-array-find~unicorn~per~0~0;prefer-array-flat-map~unicorn~per~0~1;prefer-set-has~unicorn~per~0~1;class-methods-use-this~eslint~res~0~0;complexity~eslint~res~0~0;default-case~eslint~res~0~0;no-alert~eslint~res~0~0;no-bitwise~eslint~res~0~0;no-console~eslint~res~0~0;no-div-regex~eslint~res~0~1;no-empty~eslint~res~0~0;no-empty-function~eslint~res~0~0;no-eq-null~eslint~res~0~1;no-implicit-globals~eslint~res~0~0;no-param-reassign~eslint~res~0~0;no-plusplus~eslint~res~0~0;no-proto~eslint~res~0~0;no-regex-spaces~eslint~res~0~1;no-restricted-globals~eslint~res~0~0;no-restricted-imports~eslint~res~0~0;no-restricted-properties~eslint~res~0~0;no-sequences~eslint~res~0~0;no-undefined~eslint~res~0~0;no-use-before-define~eslint~res~0~0;no-var~eslint~res~0~1;no-void~eslint~res~0~0;unicode-bom~eslint~res~0~1;extensions~import~res~0~0;no-amd~import~res~0~0;no-commonjs~import~res~0~0;no-cycle~import~res~0~0;no-default-export~import~res~0~0;no-dynamic-require~import~res~0~0;no-relative-parent-imports~import~res~0~0;no-webpack-loader-syntax~import~res~0~0;unambiguous~import~res~0~0;check-access~jsdoc~res~0~0;empty-tags~jsdoc~res~0~0;anchor-ambiguous-text~jsx_a11y~res~0~0;handle-callback-err~node~res~0~0;no-new-require~node~res~0~0;no-path-concat~node~res~0~0;no-process-env~node~res~0~0;no-top-level-await~node~res~0~0;bad-bitwise-operator~oxc~res~0~0;no-async-await~oxc~res~0~0;no-barrel-file~oxc~res~0~0;no-const-enum~oxc~res~0~1;no-optional-chaining~oxc~res~0~0;no-rest-spread-properties~oxc~res~0~0;catch-or-return~promise~res~0~0;spec-only~promise~res~0~0;button-has-type~react~res~0~0;forbid-component-props~react~res~0~0;forbid-dom-props~react~res~0~0;forbid-elements~react~res~0~0;invariant~react~res~0~0;jsx-filename-extension~react~res~0~0;jsx-no-literals~react~res~0~0;no-clone-element~react~res~0~0;no-danger~react~res~0~0;no-multi-comp~react~res~0~0;no-react-children~react~res~0~0;no-unknown-property~react~res~0~0;only-export-components~react~res~0~0;prefer-function-component~react~res~0~0;rule-suppression~react~res~0~0;syntax~react~res~0~0;todo~react~res~0~0;unsupported-syntax~react~res~0~0;explicit-function-return-type~typescript~res~0~0;explicit-member-accessibility~typescript~res~0~1;explicit-module-boundary-types~typescript~res~0~0;no-dynamic-delete~typescript~res~0~0;no-empty-object-type~typescript~res~0~0;no-explicit-any~typescript~res~0~1;no-import-type-side-effects~typescript~res~0~1;no-invalid-void-type~typescript~res~0~0;no-namespace~typescript~res~0~0;no-non-null-asserted-nullish-coalescing~typescript~res~0~0;no-non-null-assertion~typescript~res~0~0;no-require-imports~typescript~res~0~0;no-restricted-types~typescript~res~0~1;no-var-requires~typescript~res~0~0;non-nullable-type-assertion-style~typescript~res~0~0;prefer-literal-enum-member~typescript~res~0~0;promise-function-async~typescript~res~0~1;use-unknown-in-catch-callback-variable~typescript~res~0~0;import-style~unicorn~res~0~0;no-abusive-eslint-disable~unicorn~res~0~0;no-anonymous-default-export~unicorn~res~0~0;no-array-for-each~unicorn~res~0~0;no-array-reduce~unicorn~res~0~0;no-document-cookie~unicorn~res~0~0;no-length-as-slice-end~unicorn~res~0~1;no-magic-array-flat-depth~unicorn~res~0~0;no-process-exit~unicorn~res~0~0;no-useless-error-capture-stack-trace~unicorn~res~0~0;prefer-modern-math-apis~unicorn~res~0~0;prefer-module~unicorn~res~0~0;prefer-node-protocol~unicorn~res~0~1;prefer-number-properties~unicorn~res~0~1;require-test-timeout~vitest~res~0~0;max-props~vue~res~0~0;no-import-compiler-macros~vue~res~0~1;no-multiple-slot-args~vue~res~0~0;block-scoped-var~eslint~sus~0~0;no-extend-native~eslint~sus~0~0;no-extra-bind~eslint~sus~0~0;no-implied-eval~eslint~sus~0~0;no-new~eslint~sus~0~0;no-shadow~eslint~sus~0~0;no-underscore-dangle~eslint~sus~0~0;no-unexpected-multiline~eslint~sus~0~1;no-unmodified-loop-condition~eslint~sus~0~0;no-unneeded-ternary~eslint~sus~0~1;no-useless-concat~eslint~sus~0~0;no-useless-constructor~eslint~sus~0~0;preserve-caught-error~eslint~sus~0~1;no-absolute-path~import~sus~0~0;no-empty-named-blocks~import~sus~0~1;no-named-as-default~import~sus~0~0;no-named-as-default-member~import~sus~0~0;no-self-import~import~sus~0~0;no-unassigned-import~import~sus~0~0;no-commented-out-tests~jest~sus~0~0;no-exports-assign~node~sus~0~1;approx-constant~oxc~sus~0~0;misrefactored-assign-op~oxc~sus~0~0;no-async-endpoint-handlers~oxc~sus~0~0;no-this-in-exported-function~oxc~sus~0~0;always-return~promise~sus~0~0;no-multiple-resolved~promise~sus~0~0;no-promise-in-callback~promise~sus~0~0;capitalized-calls~react~sus~0~0;exhaustive-effect-dependencies~react~sus~0~0;hooks~react~sus~0~0;iframe-missing-sandbox~react~sus~0~0;jsx-no-comment-textnodes~react~sus~0~0;jsx-no-script-url~react~sus~0~0;memo-dependencies~react~sus~0~0;no-namespace~react~sus~0~0;no-unstable-nested-components~react~sus~0~0;react-in-jsx-scope~react~sus~0~0;style-prop-object~react~sus~0~0;consistent-return~typescript~sus~0~0;no-confusing-non-null-assertion~typescript~sus~0~0;no-extraneous-class~typescript~sus~0~0;no-generated-empty-object-type~typescript~sus~0~0;no-unnecessary-boolean-literal-compare~typescript~sus~0~1;no-unnecessary-template-expression~typescript~sus~0~1;no-unnecessary-type-arguments~typescript~sus~0~1;no-unnecessary-type-assertion~typescript~sus~0~1;no-unnecessary-type-constraint~typescript~sus~0~0;no-unnecessary-type-conversion~typescript~sus~0~0;no-unnecessary-type-parameters~typescript~sus~0~0;no-unsafe-enum-comparison~typescript~sus~0~0;no-unsafe-type-assertion~typescript~sus~0~0;consistent-function-scoping~unicorn~sus~0~0;no-accessor-recursion~unicorn~sus~0~0;no-array-fill-with-reference-type~unicorn~sus~0~0;no-array-reverse~unicorn~sus~0~0;no-array-sort~unicorn~sus~0~0;no-confusing-array-with~unicorn~sus~0~0;no-instanceof-builtins~unicorn~sus~0~0;prefer-add-event-listener~unicorn~sus~0~0;require-module-specifiers~unicorn~sus~0~1;require-post-message-target-origin~unicorn~sus~0~0;no-commented-out-tests~vitest~sus~0~0;no-required-prop-with-default~vue~sus~0~0;require-default-export~vue~sus~0~0;accessor-pairs~eslint~ped~0~0;array-callback-return~eslint~ped~0~0;eqeqeq~eslint~ped~0~1;max-classes-per-file~eslint~ped~0~0;max-depth~eslint~ped~0~0;max-lines~eslint~ped~0~0;max-lines-per-function~eslint~ped~0~0;max-nested-callbacks~eslint~ped~0~0;no-array-constructor~eslint~ped~0~1;no-case-declarations~eslint~ped~0~0;no-constructor-return~eslint~ped~0~0;no-else-return~eslint~ped~0~1;no-fallthrough~eslint~ped~0~0;no-inline-comments~eslint~ped~0~0;no-inner-declarations~eslint~ped~0~0;no-lonely-if~eslint~ped~0~0;no-loop-func~eslint~ped~0~0;no-negated-condition~eslint~ped~0~1;no-new-wrappers~eslint~ped~0~1;no-object-constructor~eslint~ped~0~0;no-promise-executor-return~eslint~ped~0~0;no-prototype-builtins~eslint~ped~0~0;no-redeclare~eslint~ped~0~0;no-self-compare~eslint~ped~0~0;no-throw-literal~eslint~ped~0~0;no-useless-return~eslint~ped~0~0;no-warning-comments~eslint~ped~0~0;prefer-promise-reject-errors~eslint~ped~0~0;radix~eslint~ped~0~1;require-await~eslint~ped~0~1;require-unicode-regexp~eslint~ped~0~0;sort-vars~eslint~ped~0~1;symbol-description~eslint~ped~0~0;max-dependencies~import~ped~0~0;no-conditional-in-test~jest~ped~0~0;require-param~jsdoc~ped~0~0;require-param-description~jsdoc~ped~0~0;require-param-name~jsdoc~ped~0~0;require-param-type~jsdoc~ped~0~1;require-returns~jsdoc~ped~0~0;require-returns-description~jsdoc~ped~0~0;require-returns-type~jsdoc~ped~0~0;require-throws-type~jsdoc~ped~0~0;require-yields-type~jsdoc~ped~0~0;branches-sharing-code~oxc~ped~0~0;checked-requires-onchange-or-readonly~react~ped~0~0;display-name~react~ped~0~0;jsx-no-target-blank~react~ped~0~0;jsx-no-useless-fragment~react~ped~0~0;no-unescaped-entities~react~ped~0~0;rules-of-hooks~react~ped~0~0;ban-ts-comment~typescript~ped~0~1;ban-types~typescript~ped~0~0;no-confusing-void-expression~typescript~ped~0~1;no-deprecated~typescript~ped~0~0;no-misused-promises~typescript~ped~0~0;no-mixed-enums~typescript~ped~0~0;no-unsafe-argument~typescript~ped~0~0;no-unsafe-assignment~typescript~ped~0~0;no-unsafe-call~typescript~ped~0~0;no-unsafe-function-type~typescript~ped~0~0;no-unsafe-member-access~typescript~ped~0~0;no-unsafe-return~typescript~ped~0~0;only-throw-error~typescript~ped~0~0;prefer-enum-initializers~typescript~ped~0~0;prefer-includes~typescript~ped~0~1;prefer-nullish-coalescing~typescript~ped~0~1;prefer-promise-reject-errors~typescript~ped~0~0;prefer-readonly-parameter-types~typescript~ped~0~0;prefer-ts-expect-error~typescript~ped~0~1;related-getter-setter-pairs~typescript~ped~0~0;require-await~typescript~ped~0~0;restrict-plus-operands~typescript~ped~0~0;return-await~typescript~ped~0~1;strict-boolean-expressions~typescript~ped~0~0;strict-void-return~typescript~ped~0~0;switch-exhaustiveness-check~typescript~ped~0~0;consistent-assert~unicorn~ped~0~1;consistent-empty-array-spread~unicorn~ped~0~0;escape-case~unicorn~ped~0~1;explicit-length-check~unicorn~ped~0~1;new-for-builtins~unicorn~ped~0~0;no-array-callback-reference~unicorn~ped~0~0;no-hex-escape~unicorn~ped~0~1;no-immediate-mutation~unicorn~ped~0~0;no-instanceof-array~unicorn~ped~0~1;no-lonely-if~unicorn~ped~0~0;no-negated-condition~unicorn~ped~0~1;no-negation-in-equality-check~unicorn~ped~0~0;no-new-buffer~unicorn~ped~0~0;no-object-as-default-parameter~unicorn~ped~0~0;no-static-only-class~unicorn~ped~0~1;no-this-assignment~unicorn~ped~0~0;no-typeof-undefined~unicorn~ped~0~1;no-unnecessary-array-flat-depth~unicorn~ped~0~0;no-unnecessary-array-splice-count~unicorn~ped~0~1;no-unnecessary-slice-end~unicorn~ped~0~1;no-unreadable-iife~unicorn~ped~0~0;no-useless-promise-resolve-reject~unicorn~ped~0~1;no-useless-switch-case~unicorn~ped~0~0;no-useless-undefined~unicorn~ped~0~1;prefer-array-flat~unicorn~ped~0~1;prefer-array-some~unicorn~ped~0~0;prefer-at~unicorn~ped~0~1;prefer-blob-reading-methods~unicorn~ped~0~0;prefer-code-point~unicorn~ped~0~1;prefer-date-now~unicorn~ped~0~1;prefer-dom-node-append~unicorn~ped~0~1;prefer-dom-node-dataset~unicorn~ped~0~1;prefer-dom-node-remove~unicorn~ped~0~0;prefer-event-target~unicorn~ped~0~0;prefer-import-meta-properties~unicorn~ped~0~1;prefer-math-min-max~unicorn~ped~0~0;prefer-math-trunc~unicorn~ped~0~0;prefer-native-coercion-functions~unicorn~ped~0~0;prefer-number-coercion~unicorn~ped~0~0;prefer-prototype-methods~unicorn~ped~0~1;prefer-query-selector~unicorn~ped~0~1;prefer-regexp-test~unicorn~ped~0~1;prefer-single-call~unicorn~ped~0~1;prefer-string-replace-all~unicorn~ped~0~1;prefer-string-slice~unicorn~ped~0~1;prefer-top-level-await~unicorn~ped~0~0;prefer-type-error~unicorn~ped~0~1;require-number-to-fixed-digits-argument~unicorn~ped~0~1;no-conditional-in-test~vitest~ped~0~0;arrow-body-style~eslint~sty~0~1;capitalized-comments~eslint~sty~0~1;curly~eslint~sty~0~1;default-case-last~eslint~sty~0~0;default-param-last~eslint~sty~0~0;func-name-matching~eslint~sty~0~0;func-names~eslint~sty~0~1;func-style~eslint~sty~0~0;grouped-accessor-pairs~eslint~sty~0~0;guard-for-in~eslint~sty~0~0;id-denylist~eslint~sty~0~0;id-length~eslint~sty~0~0;id-match~eslint~sty~0~0;init-declarations~eslint~sty~0~0;logical-assignment-operators~eslint~sty~0~0;max-params~eslint~sty~0~0;max-statements~eslint~sty~0~0;new-cap~eslint~sty~0~0;no-continue~eslint~sty~0~0;no-duplicate-imports~eslint~sty~0~0;no-extra-label~eslint~sty~0~1;no-implicit-coercion~eslint~sty~0~1;no-label-var~eslint~sty~0~0;no-labels~eslint~sty~0~0;no-lone-blocks~eslint~sty~0~0;no-magic-numbers~eslint~sty~0~0;no-multi-assign~eslint~sty~0~0;no-multi-str~eslint~sty~0~0;no-nested-ternary~eslint~sty~0~0;no-new-func~eslint~sty~0~0;no-return-assign~eslint~sty~0~0;no-script-url~eslint~sty~0~0;no-template-curly-in-string~eslint~sty~0~0;no-ternary~eslint~sty~0~0;no-useless-computed-key~eslint~sty~0~1;object-shorthand~eslint~sty~0~1;one-var~eslint~sty~0~1;operator-assignment~eslint~sty~0~1;prefer-arrow-callback~eslint~sty~0~1;prefer-const~eslint~sty~0~1;prefer-destructuring~eslint~sty~0~1;prefer-exponentiation-operator~eslint~sty~0~1;prefer-named-capture-group~eslint~sty~0~0;prefer-numeric-literals~eslint~sty~0~1;prefer-object-has-own~eslint~sty~0~1;prefer-object-spread~eslint~sty~0~1;prefer-regex-literals~eslint~sty~0~0;prefer-rest-params~eslint~sty~0~0;prefer-spread~eslint~sty~0~0;prefer-template~eslint~sty~0~1;sort-imports~eslint~sty~0~1;sort-keys~eslint~sty~0~1;vars-on-top~eslint~sty~0~0;yoda~eslint~sty~0~1;consistent-type-specifier-style~import~sty~0~1;exports-last~import~sty~0~0;first~import~sty~0~0;group-exports~import~sty~0~0;newline-after-import~import~sty~0~1;no-anonymous-default-export~import~sty~0~0;no-duplicates~import~sty~0~1;no-mutable-exports~import~sty~0~0;no-named-default~import~sty~0~0;no-named-export~import~sty~0~0;no-namespace~import~sty~0~0;no-nodejs-modules~import~sty~0~0;prefer-default-export~import~sty~0~0;consistent-test-it~jest~sty~0~1;max-expects~jest~sty~0~0;max-nested-describe~jest~sty~0~0;no-alias-methods~jest~sty~0~1;no-confusing-set-timeout~jest~sty~0~0;no-deprecated-functions~jest~sty~0~1;no-done-callback~jest~sty~0~0;no-duplicate-hooks~jest~sty~0~0;no-hooks~jest~sty~0~0;no-identical-title~jest~sty~0~0;no-interpolation-in-snapshots~jest~sty~0~0;no-jasmine-globals~jest~sty~0~1;no-large-snapshots~jest~sty~0~0;no-mocks-import~jest~sty~0~0;no-restricted-jest-methods~jest~sty~0~0;no-restricted-matchers~jest~sty~0~0;no-test-prefixes~jest~sty~0~1;no-test-return-statement~jest~sty~0~0;no-unneeded-async-expect-function~jest~sty~0~1;no-untyped-mock-factory~jest~sty~0~1;padding-around-after-all-blocks~jest~sty~0~1;padding-around-test-blocks~jest~sty~0~1;prefer-called-with~jest~sty~0~1;prefer-comparison-matcher~jest~sty~0~1;prefer-each~jest~sty~0~0;prefer-ending-with-an-expect~jest~sty~0~0;prefer-equality-matcher~jest~sty~0~0;prefer-expect-assertions~jest~sty~0~0;prefer-expect-resolves~jest~sty~0~1;prefer-hooks-in-order~jest~sty~0~0;prefer-hooks-on-top~jest~sty~0~0;prefer-importing-jest-globals~jest~sty~0~1;prefer-jest-mocked~jest~sty~0~1;prefer-lowercase-title~jest~sty~0~1;prefer-mock-promise-shorthand~jest~sty~0~1;prefer-mock-return-shorthand~jest~sty~0~1;prefer-spy-on~jest~sty~0~0;prefer-strict-equal~jest~sty~0~0;prefer-to-be~jest~sty~0~1;prefer-to-contain~jest~sty~0~1;prefer-to-have-been-called~jest~sty~0~1;prefer-to-have-been-called-times~jest~sty~0~1;prefer-to-have-length~jest~sty~0~1;prefer-todo~jest~sty~0~1;require-hook~jest~sty~0~0;require-top-level-describe~jest~sty~0~0;no-blank-blocks~jsdoc~sty~0~1;require-throws-description~jsdoc~sty~0~0;require-yields-description~jsdoc~sty~0~0;callback-return~node~sty~0~0;exports-style~node~sty~0~0;global-require~node~sty~0~0;no-mixed-requires~node~sty~0~0;no-sync~node~sty~0~0;avoid-new~promise~sty~0~0;no-nesting~promise~sty~0~0;no-return-wrap~promise~sty~0~0;param-names~promise~sty~0~0;prefer-await-to-callbacks~promise~sty~0~0;prefer-await-to-then~promise~sty~0~0;prefer-catch~promise~sty~0~0;function-component-definition~react~sty~0~0;hook-use-state~react~sty~0~0;jsx-boolean-value~react~sty~0~1;jsx-curly-brace-presence~react~sty~0~1;jsx-fragments~react~sty~0~1;jsx-handler-names~react~sty~0~0;jsx-max-depth~react~sty~0~0;jsx-pascal-case~react~sty~0~0;jsx-props-no-spreading~react~sty~0~0;no-redundant-should-component-update~react~sty~0~0;no-set-state~react~sty~0~0;prefer-es6-class~react~sty~0~0;self-closing-comp~react~sty~0~1;state-in-constructor~react~sty~0~0;adjacent-overload-signatures~typescript~sty~0~0;array-type~typescript~sty~0~1;ban-tslint-comment~typescript~sty~0~1;class-literal-property-style~typescript~sty~0~0;consistent-generic-constructors~typescript~sty~0~1;consistent-indexed-object-style~typescript~sty~0~1;consistent-type-assertions~typescript~sty~0~1;consistent-type-definitions~typescript~sty~0~1;consistent-type-exports~typescript~sty~0~1;consistent-type-imports~typescript~sty~0~1;dot-notation~typescript~sty~0~1;method-signature-style~typescript~sty~0~0;no-empty-interface~typescript~sty~0~0;no-inferrable-types~typescript~sty~0~0;no-unnecessary-qualifier~typescript~sty~0~0;parameter-properties~typescript~sty~0~0;prefer-find~typescript~sty~0~0;prefer-for-of~typescript~sty~0~0;prefer-function-type~typescript~sty~0~1;prefer-readonly~typescript~sty~0~1;prefer-reduce-type-parameter~typescript~sty~0~1;prefer-regexp-exec~typescript~sty~0~0;prefer-return-this-type~typescript~sty~0~1;prefer-string-starts-ends-with~typescript~sty~0~1;unified-signatures~typescript~sty~0~0;catch-error-name~unicorn~sty~0~1;consistent-date-clone~unicorn~sty~0~1;consistent-existence-index-check~unicorn~sty~0~1;consistent-template-literal-escape~unicorn~sty~0~1;custom-error-definition~unicorn~sty~0~0;empty-brace-spaces~unicorn~sty~0~1;error-message~unicorn~sty~0~0;explicit-timer-delay~unicorn~sty~0~1;filename-case~unicorn~sty~0~0;max-nested-calls~unicorn~sty~0~0;no-array-method-this-argument~unicorn~sty~0~0;no-await-expression-member~unicorn~sty~0~1;no-console-spaces~unicorn~sty~0~1;no-nested-ternary~unicorn~sty~0~1;no-null~unicorn~sty~0~1;no-unreadable-array-destructuring~unicorn~sty~0~0;no-useless-collection-argument~unicorn~sty~0~0;no-zero-fractions~unicorn~sty~0~1;number-literal-case~unicorn~sty~0~1;numeric-separators-style~unicorn~sty~0~1;prefer-array-index-of~unicorn~sty~0~0;prefer-bigint-literals~unicorn~sty~0~1;prefer-class-fields~unicorn~sty~0~1;prefer-classlist-toggle~unicorn~sty~0~1;prefer-default-parameters~unicorn~sty~0~0;prefer-dom-node-text-content~unicorn~sty~0~1;prefer-export-from~unicorn~sty~0~0;prefer-global-this~unicorn~sty~0~0;prefer-includes~unicorn~sty~0~0;prefer-keyboard-event-key~unicorn~sty~0~1;prefer-logical-operator-over-ternary~unicorn~sty~0~0;prefer-modern-dom-apis~unicorn~sty~0~0;prefer-negative-index~unicorn~sty~0~1;prefer-object-from-entries~unicorn~sty~0~0;prefer-optional-catch-binding~unicorn~sty~0~1;prefer-reflect-apply~unicorn~sty~0~0;prefer-response-static-json~unicorn~sty~0~0;prefer-spread~unicorn~sty~0~1;prefer-string-raw~unicorn~sty~0~1;prefer-string-trim-start-end~unicorn~sty~0~1;prefer-structured-clone~unicorn~sty~0~0;prefer-ternary~unicorn~sty~0~0;relative-url-style~unicorn~sty~0~1;require-array-join-separator~unicorn~sty~0~1;require-module-attributes~unicorn~sty~0~0;switch-case-braces~unicorn~sty~0~1;switch-case-break-position~unicorn~sty~0~0;text-encoding-identifier-case~unicorn~sty~0~1;throw-new-error~unicorn~sty~0~1;consistent-each-for~vitest~sty~0~0;consistent-test-filename~vitest~sty~0~0;consistent-test-it~vitest~sty~0~1;consistent-vitest-vi~vitest~sty~0~1;max-expects~vitest~sty~0~0;max-nested-describe~vitest~sty~0~0;no-alias-methods~vitest~sty~0~1;no-duplicate-hooks~vitest~sty~0~0;no-hooks~vitest~sty~0~0;no-identical-title~vitest~sty~0~0;no-import-node-test~vitest~sty~0~0;no-importing-vitest-globals~vitest~sty~0~1;no-interpolation-in-snapshots~vitest~sty~0~0;no-large-snapshots~vitest~sty~0~0;no-mocks-import~vitest~sty~0~0;no-restricted-matchers~vitest~sty~0~0;no-restricted-vi-methods~vitest~sty~0~0;no-test-prefixes~vitest~sty~0~1;no-test-return-statement~vitest~sty~0~0;no-unneeded-async-expect-function~vitest~sty~0~1;padding-around-after-all-blocks~vitest~sty~0~1;padding-around-test-blocks~vitest~sty~0~1;prefer-called-exactly-once-with~vitest~sty~0~1;prefer-called-once~vitest~sty~0~1;prefer-called-times~vitest~sty~0~1;prefer-called-with~vitest~sty~0~1;prefer-comparison-matcher~vitest~sty~0~1;prefer-describe-function-title~vitest~sty~0~1;prefer-each~vitest~sty~0~0;prefer-equality-matcher~vitest~sty~0~0;prefer-expect-assertions~vitest~sty~0~0;prefer-expect-resolves~vitest~sty~0~1;prefer-expect-type-of~vitest~sty~0~1;prefer-hooks-in-order~vitest~sty~0~0;prefer-hooks-on-top~vitest~sty~0~0;prefer-import-in-mock~vitest~sty~0~1;prefer-importing-vitest-globals~vitest~sty~0~1;prefer-lowercase-title~vitest~sty~0~1;prefer-mock-promise-shorthand~vitest~sty~0~1;prefer-mock-return-shorthand~vitest~sty~0~1;prefer-spy-on~vitest~sty~0~0;prefer-strict-boolean-matchers~vitest~sty~0~1;prefer-strict-equal~vitest~sty~0~0;prefer-to-be~vitest~sty~0~1;prefer-to-be-falsy~vitest~sty~0~0;prefer-to-be-object~vitest~sty~0~1;prefer-to-be-truthy~vitest~sty~0~0;prefer-to-contain~vitest~sty~0~1;prefer-to-have-been-called-times~vitest~sty~0~1;prefer-to-have-length~vitest~sty~0~1;prefer-todo~vitest~sty~0~1;require-hook~vitest~sty~0~0;require-top-level-describe~vitest~sty~0~0;component-definition-name-casing~vue~sty~0~1;define-emits-declaration~vue~sty~0~0;define-props-declaration~vue~sty~0~0;define-props-destructuring~vue~sty~0~0;next-tick-style~vue~sty~0~1;prop-name-casing~vue~sty~0~0;require-default-prop~vue~sty~0~0;require-direct-export~vue~sty~0~0;require-prop-types~vue~sty~0~0;require-typed-ref~vue~sty~0~0;no-restricted-exports~eslint~nur~0~0;no-undef~eslint~nur~0~0;no-unreachable-loop~eslint~nur~0~0;no-useless-assignment~eslint~nur~0~0;export~import~nur~0~0;named~import~nur~0~0;no-return-in-finally~promise~nur~0~0;require-render-return~react~nur~0~0;no-unnecessary-condition~typescript~nur~0~0;prefer-optional-chain~typescript~nur~0~1;no-useless-iterator-to-array~unicorn~nur~0~1";
+const CATS = [
+  ["cor","correctness","代码确实写错了","确定是 bug 或死代码，误报率极低"],
+  ["sus","suspicious","代码看起来写错了","很可能有问题，但存在少数误报"],
+  ["per","perf","能跑，但跑得慢","有更高效的写法"],
+  ["sty","style","能跑，但不像团队写法","纯风格，不影响正确性"],
+  ["ped","pedantic","极其严格","要求很高，误报相对多"],
+  ["res","restriction","禁止某些特性","团队策略，不是质量问题"],
+  ["nur","nursery","实验中的新规则","还在开发，可能变"]
+];
+
+const SCENES = [
+  ["assign","变量赋值写错","给不该改的东西赋值，或者赋值给了自己"],
+  ["unused","写了没用 / 跑不到","声明、表达式、代码块白写了"],
+  ["cond","条件与比较写错","if 判断、NaN、typeof、连续比较这类经典坑"],
+  ["dupe","重复定义","同一个 key、case、类型成员写了两次"],
+  ["arr","数组与集合用法错","sort 不传比较、for...in 遍历数组、delete 数组元素"],
+  ["async","Promise 与异步","忘了 await、await 了非 Promise、错误被吞掉"],
+  ["ts","TypeScript 类型问题","类型断言、this 绑定、模板字符串、包装类型"],
+  ["cls","类与继承","super 调用时机、getter/setter 返回值"],
+  ["regex","正则与字符串","非法正则、无效转义、不可见空白字符"],
+  ["err","错误处理","catch 里原样抛出、finally 吞掉返回值"],
+  ["danger","危险 API 与全局","eval、with、debugger、改写内置对象"],
+  ["misc","其他零散","数字精度、空解构、循环方向等"]
+];
+
+const ZH = {
+"no-const-assign":["给 const 声明的变量重新赋值","assign"],
+"no-class-assign":["给类名重新赋值","assign"],
+"no-func-assign":["给函数声明重新赋值","assign"],
+"no-import-assign":["给 import 进来的绑定重新赋值","assign"],
+"no-global-assign":["给只读全局变量赋值，比如 undefined = 1","assign"],
+"no-ex-assign":["给 catch 的异常参数重新赋值","assign"],
+"no-self-assign":["把变量赋值给自己，比如 x = x","assign"],
+"no-unassigned-vars":["用 let 声明了却从没赋过值","assign"],
+"no-delete-var":["对变量用 delete，实际会静默失败","assign"],
+
+"no-unused-vars":["声明了但没用到的变量、参数、函数","unused"],
+"no-unreachable":["return 或 throw 之后的代码永远跑不到","unused"],
+"no-unused-labels":["打了标签但从来没用 break / continue 引用","unused"],
+"no-unused-private-class-members":["类的私有成员从没被访问过","unused"],
+"no-unused-expressions":["写了个表达式但结果没人用，比如单独一行的 a && b()","unused"],
+"only-used-in-recursion":["这个参数只用来递归传给自己，等于没起作用","unused"],
+"no-empty-file":["空文件","unused"],
+
+"no-cond-assign":["if / while 的条件里写了赋值，= 写成 == 的经典事故","cond"],
+"no-constant-condition":["条件是常量，比如 if (true) 或 while (1)","cond"],
+"no-constant-binary-expression":["常量表达式做比较，结果永远一样，比如 x === x","cond"],
+"no-compare-neg-zero":["和 -0 比较，用 === 0 永远抓不到 -0","cond"],
+"use-isnan":["用 === NaN 判断 NaN，永远返回 false，该用 Number.isNaN","cond"],
+"valid-typeof":["typeof 后面类型名写错，比如 typeof x === \"strnig\"","cond"],
+"no-unsafe-negation":["! 用错优先级，比如 !key in obj 实际是 (!key) in obj","cond"],
+"bad-comparison-sequence":["连续比较写错，a < b < c 实际是 (a<b) < c","cond"],
+"double-comparisons":["同一个值连着比较两次，条件写重了","cond"],
+"const-comparisons":["两个常量做比较，结果恒定","cond"],
+"bad-object-literal-comparison":["用对象字面量做比较，引用不同永远不相等","cond"],
+"bad-char-at-comparison":["charAt() 直接和字符串比，少写了索引","cond"],
+"no-extra-boolean-cast":["多余的布尔转换，比如 if (!!x)","cond"],
+
+"no-dupe-keys":["对象字面量里重复的 key，后面的会覆盖前面的","dupe"],
+"no-dupe-class-members":["类里重复定义同名成员","dupe"],
+"no-dupe-else-if":["if / else if 里有重复的条件","dupe"],
+"no-duplicate-case":["switch 里重复的 case","dupe"],
+"no-duplicate-enum-values":["enum 里重复的值","dupe"],
+"no-duplicate-type-constituents":["联合类型里重复的成员，比如 string | string","dupe"],
+"no-redundant-type-constituents":["联合类型里有被覆盖的冗余成员，比如 string | \"a\"","dupe"],
+
+"no-sparse-arrays":["数组里有空洞，比如 [1, , 3]","arr"],
+"no-array-delete":["对数组元素用 delete，会留下空洞，该用 splice","arr"],
+"no-for-in-array":["用 for...in 遍历数组，会遍历到原型链上的东西","arr"],
+"require-array-sort-compare":["sort 不传比较函数，默认按字符串排，[10,9] 会排错","arr"],
+"prefer-set-size":["判断集合大小该用 size，而不是遍历数一遍","arr"],
+"bad-array-method-on-arguments":["对 arguments 用数组方法，它不是真数组","arr"],
+"bad-min-max-func":["Math.min / Math.max 用法错，比如传数组没展开","arr"],
+"bad-replace-all-arg":["replaceAll 第一个参数传了非全局正则","arr"],
+"bad-match-all-arg":["matchAll 的参数不是全局正则","arr"],
+"no-new-array":["new Array() 的用法有歧义，new Array(3) 是长度不是元素","arr"],
+"no-useless-length-check":["多余的长度检查，这个值不可能为空","arr"],
+"no-useless-spread":["多余的展开，比如 [...arr] 只是复制一份","arr"],
+"no-useless-fallback-in-spread":["展开时多余的兜底，比如 ...(arr || [])","arr"],
+
+"no-async-promise-executor":["new Promise 的 executor 写成了 async，错误会被吞掉","async"],
+"no-floating-promises":["创建了 Promise 却没 await 也没 catch，出错没人知道","async"],
+"await-thenable":["await 了一个根本不是 Promise 的值","async"],
+"no-await-in-promise-methods":["在 Promise.all 的参数里直接 await，等于串行了","async"],
+"no-unnecessary-await":["多余的 await，这个值本来就是同步的","async"],
+"no-thenable":["普通对象上定义了 then 属性，会被当成 Promise 处理","async"],
+"no-single-promise-in-promise-methods":["Promise.all / race 只传了一个 Promise，没必要","async"],
+"no-implied-eval":["隐式 eval，比如 setTimeout(\"代码字符串\", 0)","async"],
+
+"restrict-template-expressions":["模板字符串里塞了非字符串值，对象会变成 [object Object]","ts"],
+"no-base-to-string":["对没有合适 toString 的对象做字符串化，结果没意义","ts"],
+"no-wrapper-object-types":["用 String / Number 包装类型，该用小写原始类型","ts"],
+"unbound-method":["把方法当值传出去，this 绑定丢了","ts"],
+"no-this-alias":["把 this 赋给别的变量，比如 const self = this","ts"],
+"no-extra-non-null-assertion":["多余的 !，比如 x!!","ts"],
+"no-non-null-asserted-optional-chain":["在 ?. 后面再加 !，自相矛盾","ts"],
+"prefer-as-const":["字面量类型断言可以写成 as const","ts"],
+"prefer-namespace-keyword":["用 module 关键字，该用 namespace","ts"],
+"triple-slash-reference":["用 /// <reference> 引入类型，该用 import","ts"],
+"no-misused-new":["接口里写 constructor，或类里写 new() 签名","ts"],
+"no-unsafe-declaration-merging":["同名接口和类合并，容易出现危险行为","ts"],
+"no-unsafe-unary-minus":["对非数字类型用一元负号","ts"],
+"no-useless-default-assignment":["参数默认值是多余的，类型里已经包含 undefined","ts"],
+"no-useless-empty-export":["空的 export {} 什么作用都没有","ts"],
+"no-unnecessary-parameter-property-assignment":["构造函数参数属性又手动赋了一次值","ts"],
+"no-misused-spread":["对不该展开的东西用展开，比如 [...someString]","ts"],
+"no-meaningless-void-operator":["void 用在了本来就是 void 的地方","ts"],
+"no-unsafe-optional-chaining":["在 ?. 的结果上直接运算，可能是 undefined","ts"],
+"prefer-string-starts-ends-with":["用 startsWith / endsWith 代替 indexOf 判断","ts"],
+
+"constructor-super":["派生类必须调 super()，非派生类不能调","cls"],
+"no-this-before-super":["在 super() 之前就用了 this","cls"],
+"getter-return":["getter 没有返回值，读出来永远是 undefined","cls"],
+"no-setter-return":["setter 里返回值，返回值会被忽略","cls"],
+
+"no-control-regex":["正则里包含控制字符","regex"],
+"no-invalid-regexp":["非法的正则表达式","regex"],
+"no-empty-character-class":["空的字符类 []，永远匹配不到东西","regex"],
+"no-misleading-character-class":["字符类里有 emoji 这类多码点字符，会误匹配","regex"],
+"no-useless-backreference":["正则里没起作用的反向引用","regex"],
+"no-useless-escape":["多余的转义，比如 \\a","regex"],
+"no-irregular-whitespace":["代码里混入了不可见的特殊空白字符","regex"],
+
+"no-useless-catch":["catch 里只是原样 throw，等于没写","err"],
+"no-unsafe-finally":["finally 里 return / throw，会吞掉 try 的返回值","err"],
+"missing-throw":["该抛错的地方没抛，错误被静默忽略","err"],
+
+"no-debugger":["代码里留下了 debugger 语句","danger"],
+"no-eval":["用了 eval","danger"],
+"no-with":["用了 with 语句","danger"],
+"no-caller":["用了 arguments.caller 或 arguments.callee","danger"],
+"no-iterator":["用了废弃的 __iterator__ 属性","danger"],
+"no-obj-calls":["把 Math / JSON 这类内置对象当函数调用","danger"],
+"no-new-native-nonconstructor":["对 Symbol / BigInt 用 new","danger"],
+"no-shadow-restricted-names":["用 undefined / NaN 这类受限名做变量名","danger"],
+
+"for-direction":["for 循环的更新方向写反了，会死循环","misc"],
+"require-yield":["generator 函数里一个 yield 都没有","misc"],
+"no-empty-pattern":["空的解构模式，比如 const {} = obj","misc"],
+"no-empty-static-block":["空的 static 初始化块","misc"],
+"no-loss-of-precision":["数字字面量超出精度，比如 9007199254740993","misc"],
+"no-nonoctal-decimal-escape":["用了 \\8 \\9 这种无效转义","misc"],
+"number-arg-out-of-range":["数字方法的参数越界，比如 toFixed(200)","misc"],
+"erasing-op":["无意义的运算，比如 x * 1 或 x + 0","misc"],
+"uninvoked-array-callback":["数组方法的回调没被真正调用","misc"],
+"no-invalid-fetch-options":["fetch 的 options 参数写错","misc"],
+"no-invalid-remove-event-listener":["removeEventListener 传了不同的函数引用，解绑无效","misc"],
+"no-useless-rename":["重命名 import / 解构时新旧名一模一样","misc"]
+};
+
+const EX = {
+"no-const-assign":["const a = 1;","a = 2;  // ✗ TypeError: Assignment to constant"],
+"no-class-assign":["class User {}","User = class {};  // ✗ 类名不能被重新赋值"],
+"no-func-assign":["function load() {}","load = () => {};  // ✗ 函数声明不能被覆盖"],
+"no-import-assign":["import { config } from './config';","config = {};  // ✗ import 绑定是只读的"],
+"no-global-assign":["undefined = 1;  // ✗ 只读全局变量，静默失败"],
+"no-ex-assign":["try { run(); } catch (e) {","  e = new Error('x');  // ✗ 覆盖了原始错误","}"],
+"no-self-assign":["let x = 1;","x = x;  // ✗ 什么也没做"],
+"no-unassigned-vars":["let total;  // ✗ 声明了但从来没有赋过值","console.log(total);"],
+"no-delete-var":["let x = 1;","delete x;  // ✗ 对变量无效，静默失败"],
+
+"no-unused-vars":["function calc(a, b) {","  return a;  // ✗ b 从没被用到","}","const unused = 42;  // ✗ 也没被用到"],
+"no-unreachable":["function f() {","  return 1;","  console.log('never');  // ✗ 永远跑不到","}"],
+"no-unused-labels":["loop: for (const i of [1, 2]) {","  break;  // ✗ 标签 loop 没用上","}"],
+"no-unused-private-class-members":["class A {","  #secret = 1;  // ✗ 私有字段从没被读取","}"],
+"no-unused-expressions":["function f(a, b) {","  a + b;  // ✗ 算完就丢了","}"],
+"only-used-in-recursion":["function walk(node, ctx) {","  if (!node) return;","  walk(node.next, ctx);  // ✗ ctx 只是原样往下传","}"],
+"no-empty-file":["// 整个文件只有这一行注释"],
+
+"no-cond-assign":["let found;","if (found = search()) {  // ✗ = 写成了 ==","  use(found);","}"],
+"no-constant-condition":["if (true) { run(); }  // ✗ 条件恒定","while (1) { tick(); }  // ✗ 永远为真"],
+"no-constant-binary-expression":["if (x === x) {  // ✗ 恒为 true，等于没判断","}"],
+"no-compare-neg-zero":["if (value === -0) {  // ✗ 0 也会命中，区分不了","}"],
+"use-isnan":["if (result === NaN) {  // ✗ 永远 false","}"],
+"valid-typeof":["if (typeof x === 'strnig') {  // ✗ 拼错了，永远 false","}"],
+"no-unsafe-negation":["if (!key in obj) {  // ✗ 实际是 (!key) in obj","}"],
+"bad-comparison-sequence":["if (a < b < c) {  // ✗ 实际是 (a<b) < c，永远 true","}"],
+"double-comparisons":["if (x === 1 || x === 1) {  // ✗ 后半句是多余的","}"],
+"const-comparisons":["if (1 < 2) {  // ✗ 两个常量比较，结果恒定","}"],
+"bad-object-literal-comparison":["if (obj === {}) {  // ✗ 引用不同，永远 false","}"],
+"bad-char-at-comparison":["if (str.charAt(0) === 'abc') {  // ✗ 单字符不可能等于三个字符","}"],
+"no-extra-boolean-cast":["if (!!flag) {  // ✗ if 里本来就会转布尔","}"],
+
+"no-dupe-keys":["const user = {","  id: 1,","  id: 2,  // ✗ 后面的静默覆盖前面的","};"],
+"no-dupe-class-members":["class A {","  run() {}","  run() {}  // ✗ 重复定义","}"],
+"no-dupe-else-if":["if (a) {","} else if (b) {","} else if (a) {  // ✗ 和第一个条件重复","}"],
+"no-duplicate-case":["switch (x) {","  case 1: break;","  case 1: break;  // ✗ 永远进不来","}"],
+"no-duplicate-enum-values":["enum Status {","  Ok = 1,","  Fine = 1,  // ✗ 值重复，两者相等","}"],
+"no-duplicate-type-constituents":["type T = string | string;  // ✗ 重复成员"],
+"no-redundant-type-constituents":["type T = string | 'a';  // ✗ 'a' 已被 string 覆盖"],
+
+"no-sparse-arrays":["const a = [1, , 3];  // ✗ 中间有个空洞"],
+"no-array-delete":["const a = [1, 2, 3];","delete a[1];  // ✗ 留下空洞，该用 splice(1, 1)"],
+"no-for-in-array":["for (const i in arr) {  // ✗ i 是字符串下标，还会遍历原型链","}"],
+"require-array-sort-compare":["[10, 9, 1].sort();  // ✗ 按字符串排，得到 [1, 10, 9]"],
+"prefer-set-size":["let n = 0;","for (const _ of set) n++;  // ✗ 直接用 set.size"],
+"bad-array-method-on-arguments":["function f() {","  return arguments.map((x) => x);  // ✗ arguments 没有 map","}"],
+"bad-min-max-func":["Math.max([1, 2, 3]);  // ✗ 得到 NaN，该写 Math.max(...arr)"],
+"bad-replace-all-arg":["'a-b-c'.replaceAll(/-/, '_');  // ✗ 非全局正则会抛错"],
+"bad-match-all-arg":["'a1b2'.matchAll(/\\d/);  // ✗ 必须带 g 标志"],
+"no-new-array":["new Array(3);  // ✗ 是长度 3 还是 [3]？有歧义"],
+"no-useless-length-check":["if (arr.length > 0 && arr[0]) {  // ✗ 前半句是多余的","}"],
+"no-useless-spread":["for (const x of [...arr]) {  // ✗ 遍历不需要先复制一份","}"],
+"no-useless-fallback-in-spread":["const all = [...(arr || [])];  // ✗ arr 一定已经是数组"],
+
+"no-async-promise-executor":["new Promise(async (resolve) => {  // ✗ 抛出的错误会被吞掉","  await load();","  resolve();","});"],
+"no-floating-promises":["function onClick() {","  save(data);  // ✗ 没 await 也没 catch，出错没人知道","}"],
+"await-thenable":["const n = await 42;  // ✗ 42 不是 Promise"],
+"no-await-in-promise-methods":["await Promise.all([await a(), await b()]);  // ✗ 变成串行了"],
+"no-unnecessary-await":["const first = await arr[0];  // ✗ 同步取值，await 多余"],
+"no-thenable":["const obj = { then: () => {} };  // ✗ 会被当成 Promise 处理"],
+"no-single-promise-in-promise-methods":["await Promise.all([fetchOne()]);  // ✗ 只有一个，直接 await 即可"],
+"no-implied-eval":["setTimeout('doWork()', 100);  // ✗ 字符串会被当代码执行"],
+
+"restrict-template-expressions":["const msg = `user: ${user}`;  // ✗ 对象会变成 [object Object]"],
+"no-base-to-string":["String(new Map());  // ✗ 得到 \"[object Map]\"，没有意义"],
+"no-wrapper-object-types":["function f(x: String) {}  // ✗ 该用小写 string"],
+"unbound-method":["const fn = obj.method;  // ✗ this 丢了","fn();  // TypeError"],
+"no-this-alias":["function init() {","  const self = this;  // ✗ 该用箭头函数或 bind","}"],
+"no-extra-non-null-assertion":["const v = obj!!.value;  // ✗ 第二个 ! 是多余的"],
+"no-non-null-asserted-optional-chain":["const v = obj?.a!;  // ✗ ?. 之后再加 ! 自相矛盾"],
+"prefer-as-const":["const mode = 'dark' as 'dark';  // ✗ 该写 as const"],
+"prefer-namespace-keyword":["module Utils {  // ✗ 该用 namespace","}"],
+"triple-slash-reference":["/// <reference path=\"./types.d.ts\" />  // ✗ 该用 import"],
+"no-misused-new":["interface A {","  new (): A;  // ✗ 接口里写构造签名，容易误解","}"],
+"no-unsafe-declaration-merging":["class A {}","interface A { x: number }  // ✗ 同名合并，容易出现危险行为"],
+"no-unsafe-unary-minus":["const n = -someString;  // ✗ 得到 NaN"],
+"no-useless-default-assignment":["function f(x = undefined) {}  // ✗ 默认值什么也没做"],
+"no-useless-empty-export":["export {};  // ✗ 什么也没导出"],
+"no-unnecessary-parameter-property-assignment":["class A {","  constructor(private x: number) {","    this.x = x;  // ✗ 参数属性已经自动赋过了","  }","}"],
+"no-misused-spread":["const o = { ...'abc' };  // ✗ 得到 {0:'a', 1:'b', 2:'c'}"],
+"no-meaningless-void-operator":["void console.log('x');  // ✗ 它本来就返回 void"],
+"no-unsafe-optional-chaining":["const total = obj?.count + 1;  // ✗ obj 为空时得到 NaN"],
+"prefer-string-starts-ends-with":["if (url.indexOf('http') === 0) {  // ✗ 该用 startsWith","}"],
+
+"constructor-super":["class A extends B {","  constructor() {","    // ✗ 少了 super()","  }","}"],
+"no-this-before-super":["class A extends B {","  constructor() {","    this.x = 1;  // ✗ super() 之前不能用 this","    super();","  }","}"],
+"getter-return":["class A {","  get name() {","    const n = 'x';  // ✗ 没有 return，读出来是 undefined","  }","}"],
+"no-setter-return":["class A {","  set name(v) {","    return v;  // ✗ setter 的返回值会被忽略","  }","}"],
+
+"no-control-regex":["const re = /\\x1f/;  // ✗ 正则里包含控制字符"],
+"no-invalid-regexp":["new RegExp('[');  // ✗ 非法正则，会抛 SyntaxError"],
+"no-empty-character-class":["const re = /[]/;  // ✗ 空字符类，永远匹配不到"],
+"no-misleading-character-class":["const re = /[👍]/;  // ✗ emoji 是多码点，这样写会误匹配"],
+"no-useless-backreference":["const re = /(?:\\1)/;  // ✗ 引用不到任何分组"],
+"no-useless-escape":["const re = /\\a/;  // ✗ \\a 不是有效转义"],
+"no-irregular-whitespace":["const x = 1;　// ✗ 行尾是全角空格 U+3000"],
+
+"no-useless-catch":["try {","  run();","} catch (e) {","  throw e;  // ✗ 什么也没做，等于没写 catch","}"],
+"no-unsafe-finally":["function f() {","  try {","    return 1;","  } finally {","    return 2;  // ✗ 吞掉了前面的 return 1","  }","}"],
+"missing-throw":["function check(x) {","  if (!x) {","    new Error('invalid');  // ✗ 创建了错误但没 throw","  }","}"],
+
+"no-debugger":["function f() {","  debugger;  // ✗ 提交前忘了删","}"],
+"no-eval":["eval('alert(1)');  // ✗ 任意代码执行"],
+"no-with":["with (obj) {  // ✗ 作用域不可预测","  x = 1;","}"],
+"no-caller":["function f() {","  return arguments.callee;  // ✗ 严格模式直接抛错","}"],
+"no-iterator":["obj.__iterator__ = function () {};  // ✗ 已废弃的旧协议"],
+"no-obj-calls":["Math();  // ✗ Math 不是函数，会抛 TypeError"],
+"no-new-native-nonconstructor":["new Symbol('x');  // ✗ Symbol 不能 new"],
+"no-shadow-restricted-names":["function f(undefined) {  // ✗ 覆盖了 undefined","}"],
+
+"for-direction":["for (let i = 0; i < 10; i--) {  // ✗ 方向反了，死循环","}"],
+"require-yield":["function* gen() {","  return 1;  // ✗ 一个 yield 都没有，那就不该用 generator","}"],
+"no-empty-pattern":["const {} = obj;  // ✗ 什么都没取出来","const [] = arr;  // ✗ 同理"],
+"no-empty-static-block":["class A {","  static { }  // ✗ 空的初始化块","}"],
+"no-loss-of-precision":["const big = 9007199254740993;  // ✗ 实际存成 9007199254740992"],
+"no-nonoctal-decimal-escape":["const s = '\\8';  // ✗ \\8 不是有效转义"],
+"number-arg-out-of-range":["(1.5).toFixed(200);  // ✗ 参数超出 0–100，会抛 RangeError"],
+"erasing-op":["const y = x * 1;  // ✗ 乘 1 什么也没做"],
+"uninvoked-array-callback":["arr.map(getValue());  // ✗ 传的是调用结果，不是函数"],
+"no-invalid-fetch-options":["fetch(url, { method: 'GET', body: 'x' });  // ✗ GET 不能带 body"],
+"no-invalid-remove-event-listener":["el.addEventListener('click', () => {});","el.removeEventListener('click', () => {});  // ✗ 不是同一个函数，解绑无效"],
+"no-useless-rename":["import { foo as foo } from './mod';  // ✗ 新旧名一样"]
+};
+/* MORE_START */
+const MORE = {
+"block-scoped-var":["var 写在了块里，容易被误解成块作用域","sus",["for (var i = 0; i < 3; i++) {}","console.log(i);  // ✗ var 不是块作用域，这里还能读到 3"]],
+"no-extend-native":["给内置对象的原型加方法","sus",["Array.prototype.last = function () { return this[this.length - 1]; };  // ✗ 污染全局"]],
+"no-extra-bind":["多余地 bind 了一次","sus",["const f = (() => 1).bind(this);  // ✗ 箭头函数没有 this，bind 无效"]],
+"no-new":["new 了对象却不用它的实例","sus",["new User();  // ✗ 实例被丢掉，看着像漏写赋值"]],
+"no-shadow":["变量名遮蔽了外层同名变量","sus",["function f(value) {","  {","    const value = 2;  // ✗ 外层的 value 被挡住了","    return value;","  }","}"]],
+"no-underscore-dangle":["标识符带下划线前后缀","sus",["const _private = 1;  // ✗ 团队约定不用下划线表达私有"]],
+"no-unexpected-multiline":["换行位置有歧义","sus",["const a = b","(c).call();  // ✗ 会被解析成 b(c)，不是 b 然后 (c)"]],
+"no-unmodified-loop-condition":["循环条件里的变量循环体内没被改","sus",["let i = 0;","while (i < 10) { doSomething(); }  // ✗ i 从没变过，死循环"]],
+"no-unneeded-ternary":["三元表达式只是返回布尔","sus",["const ok = x > 0 ? true : false;  // ✗ 直接写 x > 0"]],
+"no-useless-concat":["拼接两个字符串字面量","sus",["const s = 'a' + 'b';  // ✗ 直接写 'ab'"]],
+"no-useless-constructor":["空的构造函数","sus",["class A {","  constructor() {}  // ✗ 什么都没做，删掉它","}"]],
+"preserve-caught-error":["抛新错误时丢掉了原始错误","sus",["try {","  load();","} catch (error) {","  throw new Error('加载失败');  // ✗ 原始 error 被丢掉","}"]],
+"no-absolute-path":["用绝对路径引入模块","sus",["import config from '/src/config';  // ✗ 换机器就找不到"]],
+"no-empty-named-blocks":["导入了一个空的大括号","sus",["import {} from './mod';  // ✗ 什么都没导入"]],
+"no-named-as-default":["默认导入的名字和命名导出重名","sus",["// mod.ts 里 export default foo","import foo from './mod';  // ✗ 容易和命名导出混淆"]],
+"no-named-as-default-member":["从默认导入上取不存在的成员","sus",["import foo from './mod';","foo.bar;  // ✗ bar 在默认导出上并不存在"]],
+"no-self-import":["文件导入了自己","sus",["// 在 user.ts 里","import { User } from './user';  // ✗ 自己引自己"]],
+"no-unassigned-import":["导入了但完全没有使用","sus",["import './polyfill';  // ✗ 如果只是副作用，确认一下是否有意为之"]],
+"no-commented-out-tests":["注释掉的测试用例","sus",["// test('提交后刷新列表', () => {","//   expect(list).toHaveLength(1);","// });  // ✗ 要么恢复要么删掉"]],
+"no-exports-assign":["直接给 exports 赋值","sus",["exports = {};  // ✗ 该用 exports.x = ... 或 module.exports"]],
+"approx-constant":["用近似的小数代替内置常量","sus",["const pi = 3.14159;  // ✗ 直接用 Math.PI"]],
+"misrefactored-assign-op":["重构时用错了复合赋值","sus",["count += count + 1;  // ✗ 大概是 count += 1"]],
+"no-async-endpoint-handlers":["路由处理器是 async 的","sus",["app.get('/user', async (req, res) => {","  res.json(await fetchUser());  // ✗ 抛错时不会被 express 捕获","});"]],
+"no-this-in-exported-function":["导出的函数里用了 this","sus",["export function helper() {","  return this.value;  // ✗ 被 import 后 this 是 undefined","}"]],
+"always-return":["then 回调里没有 return，链条断了","sus",["fetchUser().then((user) => {","  save(user);  // ✗ 没 return，后面的 then 拿不到","});"]],
+"no-multiple-resolved":["Promise 里 resolve 了多次","sus",["new Promise((resolve) => {","  resolve(1);","  resolve(2);  // ✗ 只有第一个生效，第二个是死代码","});"]],
+"no-promise-in-callback":["不支持 Promise 的回调里返回 Promise","sus",["ids.forEach((id) => {","  fetch(`/user/${id}`);  // ✗ forEach 不会等它","});"]],
+"capitalized-calls":["把组件当普通函数调用","sus",["function render() {","  return <user />;  // ✗ 小写会被当成 DOM 标签","}"]],
+"exhaustive-effect-dependencies":["useEffect 依赖数组漏项","sus",["useEffect(() => {","  init(step);  // ✗ 依赖里没有 step","}, []);"]],
+"hooks":["Hook 用在了条件或循环里","sus",["if (ok) {","  const [v, setV] = useState(0);  // ✗ Hook 必须在顶层调用","}"]],
+"iframe-missing-sandbox":["iframe 没有 sandbox 属性","sus",["<iframe src={url} />  // ✗ 缺少 sandbox，嵌入内容权限过大"]],
+"jsx-no-comment-textnodes":["JSX 里把注释写成了文本","sus",["return (","  <div>","    // 这不是注释，会被渲染成文字  // ✗","  </div>",");"]],
+"jsx-no-script-url":["href 用了 javascript: 协议","sus",["<a href=\"javascript:void(0)\">点我</a>  // ✗ 安全隐患"]],
+"memo-dependencies":["useMemo 依赖数组漏项","sus",["const total = useMemo(() => price * count, [price]);  // ✗ 漏了 count"]],
+"no-unstable-nested-components":["在组件内部再定义组件","sus",["function Parent() {","  function Child() { return <div />; }  // ✗ 每次渲染都是新组件类型","  return <Child />;","}"]],
+"react-in-jsx-scope":["用了 JSX 但 React 不在作用域内","sus",["return <div />;  // ✗ 老版 JSX 运行时需要 import React"]],
+"style-prop-object":["style 属性传了字符串","sus",["<div style=\"color: red\" />  // ✗ style 必须是对象"]],
+"consistent-return":["函数有的路径返回值有的不返回","sus",["function f(x: number) {","  if (x > 0) return 1;  // ✗ 其他路径隐式返回 undefined","}"]],
+"no-confusing-non-null-assertion":["非空断言的位置容易看错","sus",["const ok = b! < c;  // ✗ ! 只作用于 b，不是 b<c 整体"]],
+"no-extraneous-class":["类里只有静态成员，没必要用类","sus",["class Utils {","  static max(a: number, b: number) { return a > b ? a : b; }  // ✗ 该写普通函数","}"]],
+"no-generated-empty-object-type":["生成空对象类型的代码","sus",["type Options = {};  // ✗ 几乎所有值都能赋给它"]],
+"no-unnecessary-boolean-literal-compare":["和布尔字面量比较","sus",["if (flag === true) { run(); }  // ✗ 直接写 if (flag)"]],
+"no-unnecessary-template-expression":["模板字符串里没有变量","sus",["const s = `hello`;  // ✗ 直接写 'hello'"]],
+"no-unnecessary-type-arguments":["多余的类型参数","sus",["function f<T>(x: T) { return x; }","f<number>(1);  // ✗ T 能自动推断"]],
+"no-unnecessary-type-assertion":["多余的类型断言","sus",["const n = 1 as number;  // ✗ 它本来就是 number"]],
+"no-unnecessary-type-constraint":["泛型约束等于没约束","sus",["function f<T extends any>(x: T) { return x; }  // ✗ 删掉 extends any"]],
+"no-unnecessary-type-conversion":["来回做多余的类型转换","sus",["const n = Number(String(x));  // ✗ 转成字符串又转回数字"]],
+"no-unnecessary-type-parameters":["类型参数声明了却没用到","sus",["function f<T>(x: number) { return x; }  // ✗ T 没被用到"]],
+"no-unsafe-enum-comparison":["两个不同类型的 enum 直接比较","sus",["if (status === other.status) { }  // ✗ 两个 enum 类型不同，恒为 false"]],
+"no-unsafe-type-assertion":["编译器无法验证的强制断言","sus",["const el = {} as HTMLElement;  // ✗ 后面 el.click() 运行时才炸"]],
+"consistent-function-scoping":["函数没用到外层变量，可以移到外面","sus",["items.forEach((item) => {","  function double(n: number) { return n * 2; }  // ✗ 提到 forEach 外面","});"]],
+"no-accessor-recursion":["getter 里访问了自己","sus",["class A {","  get value() { return this.value; }  // ✗ 无限递归","}"]],
+"no-array-fill-with-reference-type":["fill 用了引用类型","sus",["const a = new Array(3).fill({});  // ✗ 三个元素是同一个对象"]],
+"no-array-reverse":["reverse 会就地修改原数组","sus",["const reversed = arr.reverse();  // ✗ arr 被改掉了，该用 [...arr].reverse()"]],
+"no-array-sort":["sort 会就地修改原数组","sus",["const sorted = arr.sort();  // ✗ arr 被改掉了，该用 [...arr].sort()"]],
+"no-confusing-array-with":["用下标取数组最后一个元素","sus",["const last = arr[arr.length - 1];  // ✗ 用 arr.at(-1) 更清楚"]],
+"no-instanceof-builtins":["对内置类型用 instanceof","sus",["if (x instanceof Array) { }  // ✗ 跨窗口会失效，用 Array.isArray"]],
+"prefer-add-event-listener":["用 onclick 这类属性绑定事件","sus",["el.onclick = () => {};  // ✗ 该用 addEventListener"]],
+"require-module-specifiers":["导出语句里没有任何说明符","sus",["export {} from './mod';  // ✗ 什么都没导出"]],
+"require-post-message-target-origin":["postMessage 用了通配目标源","sus",["win.postMessage(data, '*');  // ✗ 任意窗口都能收到"]],
+"no-required-prop-with-default":["既必填又给了默认值","sus",["defineProps({ name: { type: String, required: true, default: '' } });  // ✗ 两者矛盾"]],
+"require-default-export":["单文件组件缺少默认导出","sus",["<script setup>","// ✗ 该有 export default { name: 'MyComp' }","<\/script>"]],
+
+"no-await-in-loop":["循环里逐个 await，变成串行","per",["for (const url of urls) {","  await fetch(url);  // ✗ 该用 Promise.all 并发","}"]],
+"no-useless-call":["call/apply 没有实际作用","per",["fn.call(null);  // ✗ this 无关时直接 fn()"]],
+"no-accumulating-spread":["循环里反复展开累加器","per",["let acc = {};","for (const c of chunks) { acc = { ...acc, ...c }; }  // ✗ 每次都复制整个对象","}"]],
+"no-map-spread":["map 回调里每次都新建对象","per",["const list = items.map((item) => ({ ...item }));  // ✗ 只想复制就写 [...items]"]],
+"jsx-no-constructed-context-values":["context value 每次渲染都新建","per",["<Ctx.Provider value={{ theme }}>  // ✗ 提到 useMemo 里"]],
+"no-array-index-key":["用数组下标当 key","per",["{items.map((item, i) => <li key={i}>{item}</li>)}  // ✗ 列表变化会错位"]],
+"no-deriving-state-in-effects":["在 effect 里从 props 派生 state","per",["useEffect(() => { setFullName(first + last); }, [first, last]);  // ✗ 渲染时直接算"]],
+"no-object-type-as-default-prop":["默认值是新建的对象或数组","per",["function List({ items = [] }) { }  // ✗ 每次渲染都新建数组"]],
+"jsx-no-jsx-as-prop":["把 JSX 元素作为 prop 传下去","per",["<Card content={<div>hi</div>} />  // ✗ 每次渲染都新建元素"]],
+"jsx-no-new-array-as-prop":["prop 里直接写新数组","per",["<List items={[]} />  // ✗ 每次渲染都新建数组"]],
+"jsx-no-new-function-as-prop":["prop 里直接写新函数","per",["<Button onClick={() => submit()} />  // ✗ 每次渲染都新建函数"]],
+"jsx-no-new-object-as-prop":["prop 里直接写新对象","per",["<Card style={{ color: 'red' }} />  // ✗ 每次渲染都新建对象"]],
+"prefer-array-find":["用 filter()[0] 找一个元素","per",["const user = users.filter((u) => u.id === id)[0];  // ✗ 用 find"]],
+"prefer-array-flat-map":["先 map 再 filter 的组合","per",["arr.map((x) => x.items).filter(Boolean);  // ✗ 用 flatMap"]],
+"arrow-body-style":["箭头函数可以直接返回，却写了大括号","sty",["const double = (n) => { return n * 2; };  // ✗ 可以写成 (n) => n * 2"]],
+"capitalized-comments":["注释首字母没大写","sty",["// 这里是配置项  // ✗ 约定注释首字母大写"]],
+"curly":["if 后面省略了大括号","sty",["if (ok) run();  // ✗ 该加大括号，避免后续加行时出错"]],
+"default-case-last":["switch 的 default 没放在最后","sty",["switch (x) {","  default: break;","  case 1: break;  // ✗ default 该挪到最后","}"]],
+"default-param-last":["带默认值的参数没放在最后","sty",["function f(a = 1, b) { }  // ✗ 默认参数必须放最后"]],
+"func-name-matching":["函数名和它赋给的变量名不一致","sty",["const load = function fetchData() {};  // ✗ 两个名字对不上"]],
+"func-names":["匿名函数没有名字","sty",["const f = function () {};  // ✗ 报错栈里看不出是哪个函数"]],
+"func-style":["函数声明和函数表达式混用","sty",["const f = function () {};  // ✗ 团队约定统一用 function f() {}"]],
+"grouped-accessor-pairs":["getter 和 setter 被拆开了","sty",["class A {","  get x() { return this._x; }","  other() {}","  set x(v) { this._x = v; }  // ✗ 该和 getter 挨着","}"]],
+"guard-for-in":["for...in 没判断是不是自有属性","sty",["for (const k in obj) { use(obj[k]); }  // ✗ 会遍历到原型链，加 Object.hasOwn"]],
+"id-denylist":["用了团队禁用名单里的标识符","sty",["const data = 1;  // ✗ data 太泛，在禁用名单里"]],
+"id-length":["标识符太短，读不出含义","sty",["const a = 1;  // ✗ 名字太短"]],
+"id-match":["标识符不符合约定的命名模式","sty",["const user_name = 1;  // ✗ 不符合 camelCase 模式"]],
+"init-declarations":["声明变量时没有初始化","sty",["let total;  // ✗ 约定声明时就给初值"]],
+"logical-assignment-operators":["用 if 判断再赋值，可以写成逻辑赋值","sty",["if (!opts) { opts = {}; }  // ✗ 该写 opts ||= {}"]],
+"max-params":["函数参数太多","sty",["function create(a, b, c, d, e) { }  // ✗ 超过上限，改成对象参数"]],
+"max-statements":["函数体语句太多","sty",["function big() { /* 三十多行语句 */ }  // ✗ 超过上限，该拆分"]],
+"new-cap":["构造函数名没有首字母大写","sty",["const u = new user();  // ✗ 构造函数该写成 User"]],
+"no-continue":["用了 continue","sty",["for (const x of list) { if (!x) continue; use(x); }  // ✗ 约定不用 continue"]],
+"no-duplicate-imports":["同一个模块导入两次","sty",["import { a } from './mod';","import { b } from './mod';  // ✗ 合并成一行"]],
+"no-extra-label":["多余的循环标签","sty",["outer: for (const x of list) { break outer; }  // ✗ 不嵌套就不需要标签"]],
+"no-implicit-coercion":["用运算做隐式类型转换","sty",["const s = '' + n;  // ✗ 该写 String(n)"]],
+"no-label-var":["标签和变量重名","sty",["const loop = 1;","loop: for (;;) { break loop; }  // ✗ 标签和变量同名，容易混淆"]],
+"no-labels":["用了标签语句","sty",["outer: for (;;) { break outer; }  // ✗ 约定禁用标签"]],
+"no-lone-blocks":["孤立的代码块","sty",["{ doSomething(); }  // ✗ 这个块没有任何作用"]],
+"no-magic-numbers":["代码里直接出现裸数字","sty",["if (retry > 3) { }  // ✗ 3 该提取成有名字的常量"]],
+"no-multi-assign":["一行里连续赋值","sty",["const a = b = 1;  // ✗ b 变成了隐式全局变量"]],
+"no-multi-str":["用反斜杠续行拼多行字符串","sty",["const s = 'line1 \\","line2';  // ✗ 该用模板字符串"]],
+"no-nested-ternary":["三元表达式嵌套","sty",["const v = a ? b : c ? d : e;  // ✗ 嵌套三元几乎没人读得懂"]],
+"no-new-func":["用 new Function 动态生成函数","sty",["const f = new Function('a', 'return a');  // ✗ 等同于 eval"]],
+"no-return-assign":["return 里做了赋值","sty",["function f() { return (x = 1); }  // ✗ 看起来像比较，实际是赋值"]],
+"no-script-url":["用了 javascript: 协议","sty",["const url = 'javascript:void(0)';  // ✗ 安全隐患"]],
+"no-template-curly-in-string":["普通字符串里写了 ${}","sty",["const s = 'hello ${name}';  // ✗ 单引号不会插值，用户会看到 ${name}"]],
+"no-ternary":["用了三元表达式","sty",["const v = ok ? 1 : 2;  // ✗ 约定禁用三元"]],
+"no-useless-computed-key":["多余的方括号计算属性","sty",["const o = { ['name']: 1 };  // ✗ 直接写 name: 1"]],
+"object-shorthand":["对象属性可以简写","sty",["const o = { name: name, age: age };  // ✗ 该写 { name, age }"]],
+"one-var":["一个声明里放多个变量","sty",["let a = 1, b = 2;  // ✗ 拆成两行"]],
+"operator-assignment":["可以简写成复合赋值","sty",["x = x + 1;  // ✗ 该写 x += 1"]],
+"prefer-arrow-callback":["回调写成了普通函数","sty",["arr.map(function (x) { return x * 2; });  // ✗ 该用箭头函数"]],
+"prefer-const":["可以 const 却用了 let","sty",["let total = 0;  // ✗ 从没重新赋值，该用 const"]],
+"prefer-destructuring":["能解构却直接取属性","sty",["const name = user.name;  // ✗ 该写 const { name } = user"]],
+"prefer-exponentiation-operator":["用 Math.pow 求幂","sty",["const n = Math.pow(2, 10);  // ✗ 该写 2 ** 10"]],
+"prefer-named-capture-group":["正则捕获组没有命名","sty",["const re = /(\\d{4})-(\\d{2})/;  // ✗ 该写 (?<year>\\d{4})"]],
+"prefer-numeric-literals":["用 parseInt 写数字字面量","sty",["const n = parseInt('1111', 2);  // ✗ 该写 0b1111"]],
+"prefer-object-has-own":["用 hasOwnProperty 判断自有属性","sty",["if (obj.hasOwnProperty('k')) { }  // ✗ 该用 Object.hasOwn(obj, 'k')"]],
+"prefer-object-spread":["用 Object.assign 合并对象","sty",["const o = Object.assign({}, a, b);  // ✗ 该写 { ...a, ...b }"]],
+"prefer-regex-literals":["用 new RegExp 写静态正则","sty",["const re = new RegExp('\\\\d+');  // ✗ 该写 /\\d+/"]],
+"prefer-rest-params":["用 arguments 取参数","sty",["function f() { return arguments.length; }  // ✗ 该写 (...args) => args.length"]],
+"prefer-spread":["用 apply 传数组","sty",["Math.max.apply(null, nums);  // ✗ 该写 Math.max(...nums)"]],
+"prefer-template":["用加号拼字符串","sty",["const msg = 'hi, ' + name;  // ✗ 该用模板字符串"]],
+"sort-imports":["import 语句没有排序","sty",["import b from './b';","import a from './a';  // ✗ 该按字母序排列"]],
+"sort-keys":["对象的 key 没有排序","sty",["const o = { b: 1, a: 2 };  // ✗ key 该按字母序"]],
+"vars-on-top":["变量声明散落在函数中间","sty",["function f() {","  doSomething();","  const x = 1;  // ✗ 变量声明该集中在函数顶部","}"]],
+"yoda":["尤达式条件，常量写在左边","sty",["if (1 === x) { }  // ✗ 该写 x === 1"]],
+"consistent-type-specifier-style":["type 说明符的写法前后不一致","sty",["import type { A } from './a';","import { type B } from './b';  // ✗ 两种风格混用了"]],
+"exports-last":["export 语句没放在文件末尾","sty",["export const a = 1;","function helper() {}  // ✗ export 该集中到文件最后"]],
+"first":["import 之前还有别的语句","sty",["const x = 1;","import { a } from './a';  // ✗ import 必须在文件最前面"]],
+"group-exports":["export 分散在各处","sty",["export const a = 1;","export function b() {}  // ✗ 该集中成一个 export 块"]],
+"newline-after-import":["import 后面没有空行","sty",["import { a } from './a';","const x = 1;  // ✗ import 和代码之间要空一行"]],
+"no-mutable-exports":["导出了一个可变的 let","sty",["export let count = 0;  // ✗ 外部完全无法追踪它什么时候变"]],
+"no-named-default":["把默认导出又当命名导出转了一次","sty",["export { default as Foo } from './foo';  // ✗ 多绕了一层"]],
+"no-named-export":["用了命名导出","sty",["export const a = 1;  // ✗ 团队约定只用 export default"]],
+"no-nodejs-modules":["前端代码引入 Node 内置模块","sty",["import fs from 'node:fs';  // ✗ 浏览器里根本跑不了"]],
+"prefer-default-export":["只有一个导出的模块该用默认导出","sty",["export const config = {};  // ✗ 只有一项，该用 export default"]],
+"prefer-set-has":["用数组 includes 判断成员","per",["if (bigList.includes(id)) { }  // ✗ 大数组该用 new Set(bigList).has(id)"]],
+
+"no-restricted-exports":["导出了被禁止的名字","nur",["export const then = 1;  // ✗ then 这个导出名容易和 Promise 混淆"]],
+"no-undef":["用了从没声明过的变量","nur",["console.log(total);  // ✗ total 从来没定义，运行时才报错"]],
+"no-unreachable-loop":["循环第一轮就退出了","nur",["for (const x of list) {","  return x;  // ✗ 循环只会跑一次，那就不该用循环","}"]],
+"no-useless-assignment":["赋的值后面从来没被读过","nur",["let x = 1;","x = 2;","return 3;  // ✗ 前两次赋值都是白做的"]],
+"export":["用通配符导出整个模块","nur",["export * from './mod';  // ✗ 导出面不可控，重构时容易破坏外部"]],
+"named":["用命名空间方式整体导入","nur",["import * as ns from './mod';  // ✗ 不利于 tree-shaking"]],
+"no-return-in-finally":["finally 里写了 return","nur",["try {","  return 1;","} finally {","  return 2;  // ✗ 把 try 的返回值吞掉了","}"]],
+"no-unnecessary-condition":["条件永远为真或永远为假","nur",["if (arr.length >= 0) { }  // ✗ 长度永远 >= 0，这个判断没意义"]],
+"prefer-optional-chain":["用 && 链判断深层属性","nur",["if (a && a.b && a.b.c) { }  // ✗ 该写 a?.b?.c"]],
+"no-useless-iterator-to-array":["把迭代器转成数组但只用一次","nur",["const arr = [...map.values()];","for (const v of arr) { }  // ✗ 直接遍历 map.values() 就行"]],
+"expect-expect":["测试里一个断言都没有","cor",["test('adds', () => {","  add(1, 2);  // ✗ 没有 expect，这个测试永远不会失败","});"]],
+"no-conditional-expect":["expect 写在了条件里","cor",["test('x', () => {","  if (ok) { expect(a).toBe(1); }  // ✗ 条件不成立时等于没断言","});"]],
+"no-disabled-tests":["被跳过的测试","cor",["test.skip('支付流程', () => { });  // ✗ 跳过的测试等于不存在"]],
+"no-export":["测试文件里写了导出","cor",["export const helper = () => {};  // ✗ 测试文件不该有 export"]],
+"no-focused-tests":["用了 only 只跑一个测试","cor",["test.only('只有我跑', () => { });  // ✗ 其他测试全被静默跳过"]],
+"no-standalone-expect":["expect 写在了 test 外面","cor",["expect(a).toBe(1);  // ✗ 不在 test 里，根本不会被执行","test('x', () => {});"]],
+"prefer-snapshot-hint":["快照没有写说明","cor",["expect(tree).toMatchSnapshot();  // ✗ 该写 toMatchSnapshot('默认状态')"]],
+"require-to-throw-message":["toThrow 没断言错误信息","cor",["expect(() => f()).toThrow();  // ✗ 抛任何错都算通过，太宽松"]],
+"valid-describe-callback":["describe 的回调参数写错了","cor",["describe('x', (done) => { });  // ✗ describe 回调不接受参数"]],
+"valid-expect":["expect 的参数个数不对","cor",["expect(a, b).toBe(1);  // ✗ expect 只接受一个参数"]],
+"valid-expect-in-promise":["then 里写了 expect 却没 return","cor",["it('x', () => {","  fetchData().then((d) => { expect(d).toBe(1); });  // ✗ 没 return，断言可能不执行","});"]],
+"valid-title":["describe 或 test 的标题不合法","cor",["test('', () => { });  // ✗ 标题不能为空"]],
+"no-conditional-in-test":["测试里写了条件分支","ped",["test('x', () => {","  if (env === 'ci') { expect(a).toBe(1); }  // ✗ 测试逻辑不该有条件","});"]],
+"consistent-test-it":["test 和 it 混着用","sty",["test('a', () => {});","it('b', () => {});  // ✗ 统一用 test 或统一用 it"]],
+"max-expects":["一个测试里断言太多","sty",["test('x', () => {","  expect(a).toBe(1);","  expect(b).toBe(2);  // ✗ 超过上限，该拆成多个测试","});"]],
+"max-nested-describe":["describe 嵌套太深","sty",["describe('a', () => {","  describe('b', () => {","    describe('c', () => { describe('d', () => {}); });  // ✗ 嵌套过深","  });","});"]],
+"no-alias-methods":["用了断言的别名方法","sty",["expect(fn).toBeCalled();  // ✗ 该用 toHaveBeenCalled"]],
+"no-confusing-set-timeout":["在 describe 里设置了超时","sty",["describe('x', () => {","  jest.setTimeout(1000);  // ✗ 该写在文件顶层或 beforeAll","});"]],
+"no-deprecated-functions":["用了已废弃的 jest API","sty",["jest.genMockFromModule('./mod');  // ✗ 已废弃，该用 jest.createMockFromModule"]],
+"no-done-callback":["用 done 回调处理异步","sty",["test('x', (done) => { fetchData(done); });  // ✗ 该用 async/await"]],
+"no-duplicate-hooks":["同一个 describe 里重复写了钩子","sty",["describe('x', () => {","  beforeAll(() => {});","  beforeAll(() => {});  // ✗ 合并成一个","});"]],
+"no-hooks":["用了 beforeAll 这类钩子","sty",["beforeAll(() => { init(); });  // ✗ 约定不用钩子，每个测试自己准备数据"]],
+"no-identical-title":["两个测试标题一模一样","sty",["test('登录成功', () => {});","test('登录成功', () => {});  // ✗ 失败时分不清是哪个"]],
+"no-interpolation-in-snapshots":["快照名用了模板字符串","sty",["expect(x).toMatchSnapshot(`state-${n}`);  // ✗ 快照名会漂移，攒出一堆无用文件"]],
+"no-jasmine-globals":["用了 jasmine 的全局对象","sty",["jasmine.any(Number);  // ✗ 该用 expect.any(Number)"]],
+"no-large-snapshots":["快照文件太大","sty",["expect(bigTree).toMatchSnapshot();  // ✗ 上千行的快照没人会 review"]],
+"no-mocks-import":["直接 import __mocks__ 目录","sty",["import mock from './__mocks__/api';  // ✗ 该用 jest.mock 让它自动生效"]],
+"no-restricted-jest-methods":["用了被禁用的 jest 方法","sty",["jest.spyOn(obj, 'm');  // ✗ 团队禁用了 spyOn，要求用 mock"]],
+"no-restricted-matchers":["用了被禁用的断言","sty",["expect(a).toBeTruthy();  // ✗ 团队要求显式断言 toBe(true)"]],
+"no-test-prefixes":["用了 fdescribe / xit 这类前缀","sty",["fdescribe('x', () => {});  // ✗ 该写 describe.only"]],
+"no-test-return-statement":["测试函数里写了 return","sty",["test('x', () => { return 1; });  // ✗ 测试不该有返回值"]],
+"no-unneeded-async-expect-function":["把 async 函数传给了同步断言","sty",["expect(async () => {}).toThrow();  // ✗ async 函数抛错是 rejection，同步断言抓不到"]],
+"no-untyped-mock-factory":["mock 工厂函数没有类型","sty",["jest.mock('./api', () => ({ get: jest.fn() }));  // ✗ 缺类型，TS 下会丢失提示"]],
+"padding-around-after-all-blocks":["afterAll 前后没有空行","sty",["afterAll(() => {});  // ✗ 前后该各留一个空行","test('x', () => {});"]],
+"padding-around-test-blocks":["测试块之间没有空行","sty",["test('a', () => {});","test('b', () => {});  // ✗ 测试之间该空一行"]],
+"prefer-called-with":["只断言被调用，没断言参数","sty",["expect(fn).toHaveBeenCalled();  // ✗ 该写 toHaveBeenCalledWith(1, 2)"]],
+"prefer-comparison-matcher":["用 toBe 比较大小","sty",["expect(a > b).toBe(true);  // ✗ 该用 toBeGreaterThan(b)"]],
+"prefer-each":["循环里重复写 test","sty",["[1, 2, 3].forEach((n) => { test(`x${n}`, () => {}); });  // ✗ 该用 test.each"]],
+"prefer-ending-with-an-expect":["测试最后一句不是断言","sty",["test('x', () => {","  expect(a).toBe(1);","  doSomething();  // ✗ 断言后还有动作，容易掩盖问题","});"]],
+"prefer-equality-matcher":["用 toBe 比较对象","sty",["expect(obj).toBe({ a: 1 });  // ✗ 对象该用 toEqual"]],
+"prefer-expect-assertions":["没有声明断言次数","sty",["test('x', () => {","  expect(a).toBe(1);  // ✗ 该加 expect.assertions(1)，否则断言没执行也发现不了","});"]],
+"prefer-expect-resolves":["在 then 里断言 Promise 结果","sty",["await expect(p.then((v) => expect(v).toBe(1)));  // ✗ 该写 expect(p).resolves.toBe(1)"]],
+"prefer-hooks-in-order":["钩子的书写顺序不对","sty",["beforeEach(() => {});","beforeAll(() => {});  // ✗ beforeAll 该写在 beforeEach 前面"]],
+"prefer-hooks-on-top":["钩子写在了测试后面","sty",["test('x', () => {});","beforeEach(() => {});  // ✗ 钩子该放在文件顶部"]],
+"prefer-importing-jest-globals":["直接用全局的 test / expect","sty",["test('x', () => { expect(1).toBe(1); });  // ✗ 该从 @jest/globals 显式 import"]],
+"prefer-jest-mocked":["用 as jest.Mock 强转","sty",["const m = fn as jest.Mock;  // ✗ 该用 jest.mocked(fn)"]],
+"prefer-lowercase-title":["测试标题首字母大写","sty",["test('Login works', () => {});  // ✗ 标题该用小写开头"]],
+"prefer-mock-promise-shorthand":["用 mockImplementation 返回 Promise","sty",["fn.mockImplementation(() => Promise.resolve(1));  // ✗ 该用 mockResolvedValue(1)"]],
+"prefer-mock-return-shorthand":["用 mockImplementation 返回固定值","sty",["fn.mockImplementation(() => 1);  // ✗ 该用 mockReturnValue(1)"]],
+"prefer-spy-on":["手动替换对象方法","sty",["obj.method = jest.fn();  // ✗ 该用 jest.spyOn(obj, 'method')，能自动还原"]],
+"prefer-strict-equal":["该用 toStrictEqual 却用了 toEqual","sty",["expect(a).toEqual(b);  // ✗ toEqual 分不清 undefined 和属性缺失"]],
+"prefer-to-be":["用 toEqual 比较原始值","sty",["expect(a).toEqual(1);  // ✗ 原始值该用 toBe"]],
+"prefer-to-contain":["用 includes 判断包含","sty",["expect(arr.includes(1)).toBe(true);  // ✗ 该用 toContain(1)"]],
+"prefer-to-have-been-called":["用了 toBeCalled 别名","sty",["expect(fn).toBeCalled();  // ✗ 该用 toHaveBeenCalled"]],
+"prefer-to-have-been-called-times":["用了 toBeCalledTimes 别名","sty",["expect(fn).toBeCalledTimes(2);  // ✗ 该用 toHaveBeenCalledTimes"]],
+"prefer-to-have-length":["用 length 比较长度","sty",["expect(arr.length).toBe(3);  // ✗ 该用 toHaveLength(3)"]],
+"prefer-todo":["空实现的测试","sty",["test('还没写', () => {});  // ✗ 该写 test.todo('还没写')"]],
+"require-hook":["describe 里直接放了准备代码","sty",["describe('x', () => {","  db.connect();  // ✗ 该放进 beforeAll","});"]],
+"require-top-level-describe":["test 没有包在 describe 里","sty",["test('x', () => {});  // ✗ 该包在 describe 里"]],
+"check-property-names":["@property 的名字和实际不符","cor",["/** @typedef {Object} User"," *  @property {string} nam  // ✗ 拼错了，实际字段是 name"," */"]],
+"check-tag-names":["用了不存在的 JSDoc 标签","cor",["/** @retruns {number}  // ✗ 拼错了，应该是 @returns */"]],
+"implements-on-classes":["@implements 写在了非类上","cor",["/** @implements {Runnable} */  // ✗ 只有类才能 implements","function run() {}"]],
+"no-defaults":["JSDoc 里写了参数默认值","cor",["/** @param {number} [x=1]  // ✗ 默认值写在代码里，不要写进注释 */","function f(x = 1) {}"]],
+"require-property":["@typedef 缺少 @property","cor",["/** @typedef {Object} User */  // ✗ 对象类型该逐条列出 @property"]],
+"require-property-description":["@property 缺少说明","cor",["/** @property {string} name */  // ✗ 少了说明文字"]],
+"require-property-name":["@property 缺少属性名","cor",["/** @property {string} */  // ✗ 少了属性名"]],
+"require-property-type":["@property 缺少类型","cor",["/** @property name 用户名 */  // ✗ 少了 {string}"]],
+"require-yields":["有 yield 却没有 @yields","cor",["/** */  // ✗ 该补 @yields {number}","function* gen() { yield 1; }"]],
+"check-access":["@access 的值不合法","res",["/** @access secret */  // ✗ 只允许 private / protected / public / package"]],
+"empty-tags":["标签后面没有内容","res",["/** @deprecated */  // ✗ 该说明为什么废弃、替代方案是什么"]],
+"require-param":["函数有参数却没有 @param","ped",["/** 计算总价 */  // ✗ 缺少 @param {number} price","function total(price) {}"]],
+"require-param-description":["@param 缺少描述","ped",["/** @param {number} price */  // ✗ 该说明 price 是什么"]],
+"require-param-name":["@param 缺少参数名","ped",["/** @param {number} */  // ✗ 少了参数名"]],
+"require-param-type":["@param 缺少类型","ped",["/** @param price 价格 */  // ✗ 少了 {number}"]],
+"require-returns":["有返回值却没有 @returns","ped",["/** 计算总价 */  // ✗ 缺少 @returns {number}","function total() { return 1; }"]],
+"require-returns-description":["@returns 缺少描述","ped",["/** @returns {number} */  // ✗ 该说明返回的是什么"]],
+"require-returns-type":["@returns 缺少类型","ped",["/** @returns 总价 */  // ✗ 少了 {number}"]],
+"require-throws-type":["@throws 缺少类型","ped",["/** @throws 参数非法 */  // ✗ 少了 {Error}"]],
+"require-yields-type":["@yields 缺少类型","ped",["/** @yields 下一个值 */  // ✗ 少了 {number}"]],
+"no-blank-blocks":["空的 JSDoc 注释块","sty",["/** */  // ✗ 空的注释块没有任何信息","function f() {}"]],
+"require-throws-description":["@throws 缺少描述","sty",["/** @throws {Error} */  // ✗ 该说明什么情况下会抛"]],
+"require-yields-description":["@yields 缺少描述","sty",["/** @yields {number} */  // ✗ 该说明产出的是什么"]],
+"handle-callback-err":["回调的错误参数没有被检查","res",["fs.readFile(p, (err, data) => {  // ✗ err 从没被检查","  use(data);","});"]],
+"no-new-require":["对 require 的结果用 new","res",["const p = new require('path');  // ✗ 容易误读，先 require 再 new"]],
+"no-path-concat":["用加号拼接路径","res",["const p = __dirname + '/config.json';  // ✗ 该用 path.join(__dirname, 'config.json')"]],
+"no-process-env":["代码里直接读 process.env","res",["const port = process.env.PORT;  // ✗ 该集中到配置模块里统一处理"]],
+"no-top-level-await":["模块顶层用了 await","res",["const data = await load();  // ✗ CommonJS 里不支持顶层 await"]],
+"callback-return":["回调之后没有 return，继续往下执行","sty",["function f(cb) {","  if (!ok) cb(new Error('x'));  // ✗ 少了 return，下面还会再调一次 cb","  cb(null, 1);","}"]],
+"exports-style":["混用了两种导出风格","sty",["module.exports.a = 1;","exports.b = 2;  // ✗ 两种风格混用，容易出错"]],
+"global-require":["require 写在了函数内部","sty",["function load() {","  const fs = require('fs');  // ✗ 该提到模块顶部","}"]],
+"no-mixed-requires":["内置模块和本地模块混在一起 require","sty",["const fs = require('fs');","const mine = require('./mine');  // ✗ 两类模块该分组并空行隔开"]],
+"no-sync":["用了同步 API","sty",["const data = fs.readFileSync(p);  // ✗ 阻塞事件循环，该用异步版本"]],
+"no-callback-in-promise":["Promise 里调用回调风格的函数","cor",["new Promise((resolve) => {","  fs.readFile(p, (e, d) => resolve(d));  // ✗ 该用 fs.promises.readFile","});"]],
+"no-new-statics":["对 Promise 的静态方法用了 new","cor",["new Promise.resolve(1);  // ✗ Promise.resolve 不是构造函数"]],
+"valid-params":["Promise 方法的参数不合法","cor",["Promise.all();  // ✗ 必须传一个可迭代对象"]],
+"catch-or-return":["用了 then 却没有 catch 也没有 return","res",["fetchData().then((d) => use(d));  // ✗ 出错时没人处理，错误被吞掉"]],
+"spec-only":["Promise 链里用了只该出现在测试中的写法","res",["promise.then(only);  // ✗ 生产代码里不该出现 only 这类测试专用逻辑"]],
+"avoid-new":["用 new Promise 包装一个已有的 Promise","sty",["new Promise((resolve) => resolve(fetchData()));  // ✗ 直接 return fetchData()"]],
+"no-nesting":["then 里又嵌套了 then","sty",["a().then(() => {","  b().then(() => {});  // ✗ 该把链拉平，或者用 await","});"]],
+"no-return-wrap":["then 里又包了一层 Promise.resolve","sty",["a().then((v) => Promise.resolve(v));  // ✗ 直接 return v"]],
+"param-names":["resolve / reject 用了别的名字","sty",["new Promise((ok, fail) => {});  // ✗ 该叫 resolve 和 reject"]],
+"prefer-await-to-callbacks":["用了回调风格","sty",["readFile(p, (err, data) => {});  // ✗ 该用 await readFile(p)"]],
+"prefer-await-to-then":["用 then 链组织流程","sty",["fetchData().then((d) => use(d));  // ✗ 该写 const d = await fetchData()"]],
+"prefer-catch":["用 then(null, fn) 代替 catch","sty",["fetchData().then(null, (e) => handle(e));  // ✗ 该用 .catch(handle)"]],
+"error-boundaries":["错误边界没有实现捕获逻辑","cor",["class Boundary extends React.Component {","  render() { return this.props.children; }  // ✗ 没有 componentDidCatch，错误会一路冒到根","}"]],
+"exhaustive-deps":["useEffect 依赖数组漏项","cor",["useEffect(() => { load(userId); }, []);  // ✗ 依赖里漏了 userId"]],
+"forward-ref-uses-ref":["forwardRef 里没有使用 ref 参数","cor",["const Input = forwardRef((props, ref) => <input {...props} />);  // ✗ ref 没接到 DOM 上，外部拿不到"]],
+"globals":["用了未声明的全局变量","cor",["const data = myGlobal;  // ✗ myGlobal 不是已知全局，SSR 下直接崩"]],
+"immutability":["直接修改了 props 或 state","cor",["function Item({ item }) {","  item.done = true;  // ✗ 直接改了 props，父组件不会重新渲染","  return <div>{item.name}</div>;","}"]],
+"incompatible-library":["用了与 React 编译不兼容的库","cor",["import { observable } from 'mobx';  // ✗ 这个库的可变用法和 React Compiler 冲突"]],
+"jsx-key":["列表渲染缺少 key","cor",["{items.map((item) => <li>{item.name}</li>)}  // ✗ 缺少 key，列表变化时会错位"]],
+"jsx-no-duplicate-props":["同一个 prop 写了两次","cor",["<Input value={a} value={b} />  // ✗ 重复的 value，后者静默覆盖前者"]],
+"jsx-no-undef":["用了没有定义的组件","cor",["return <Button />;  // ✗ Button 从没被导入过"]],
+"jsx-props-no-spread-multi":["同一个对象被展开了两次","cor",["<Card {...props} {...props} />  // ✗ 展开两次，容易覆盖出意外结果"]],
+"no-children-prop":["用 children 属性传子元素","cor",["<Card children={<div />} />  // ✗ 该写成 <Card><div /></Card>"]],
+"no-danger-with-children":["dangerouslySetInnerHTML 和子元素同时用","cor",["<div dangerouslySetInnerHTML={{ __html: html }}>文字</div>  // ✗ 两者冲突，children 会被丢掉"]],
+"no-did-mount-set-state":["在 componentDidMount 里直接 setState","cor",["componentDidMount() {","  this.setState({ ready: true });  // ✗ 会多一次渲染，该在 constructor 里初始化","}"]],
+"no-did-update-set-state":["在 componentDidUpdate 里 setState","cor",["componentDidUpdate() {","  this.setState({ n: this.state.n + 1 });  // ✗ 直接无限循环","}"]],
+"no-direct-mutation-state":["直接修改 state 对象","cor",["this.state.count = 1;  // ✗ 该用 this.setState({ count: 1 })"]],
+"no-find-dom-node":["用了已废弃的 findDOMNode","cor",["ReactDOM.findDOMNode(this);  // ✗ 已废弃，该用 ref"]],
+"no-is-mounted":["用了已废弃的 isMounted","cor",["if (this.isMounted()) { }  // ✗ 已废弃，该用清理函数里的标志位"]],
+"no-render-return-value":["依赖 ReactDOM.render 的返回值","cor",["const inst = ReactDOM.render(<App />, el);  // ✗ 返回值不可靠，已废弃"]],
+"no-string-refs":["用了字符串形式的 ref","cor",["<input ref=\"input\" />  // ✗ 已废弃，该用 useRef 或 createRef"]],
+"no-this-in-sfc":["函数组件里用了 this","cor",["function App() { return <div>{this.props.x}</div>; }  // ✗ 函数组件根本没有 this"]],
+"no-unsafe":["用了不安全的生命周期","cor",["componentWillMount() { }  // ✗ 已废弃，该用 componentDidMount"]],
+"no-will-update-set-state":["在 componentWillUpdate 里 setState","cor",["componentWillUpdate() { this.setState({}); }  // ✗ will* 阶段禁止 setState"]],
+"preserve-manual-memoization":["手动 memo 的依赖不完整","cor",["const v = useMemo(() => f(a, b), [a]);  // ✗ 漏了 b，会一直返回过期结果"]],
+"purity":["渲染过程中产生了副作用","cor",["function App() {","  document.title = 'x';  // ✗ 渲染必须是纯的，副作用该放 useEffect","  return <div />;","}"]],
+"refs":["ref 声明了却没用上","cor",["function App() {","  const ref = useRef();  // ✗ 从没挂到任何元素上","  return <div />;","}"]],
+"set-state-in-effect":["在 effect 里同步 setState","cor",["useEffect(() => {","  setCount(count + 1);  // ✗ 触发额外渲染，很容易形成循环","}, [count]);"]],
+"set-state-in-render":["在渲染过程中 setState","cor",["function App() {","  const [n, setN] = useState(0);","  setN(1);  // ✗ 渲染中不能 setState，会无限重渲染","  return <div>{n}</div>;","}"]],
+"static-components":["每次渲染都新建一个组件类型","cor",["function App() {","  const Item = () => <li />;  // ✗ 每次渲染都是新类型，子组件状态会被重置","  return <Item />;","}"]],
+"use-memo":["useMemo 用法有问题","cor",["const v = useMemo(() => 1, []);  // ✗ 常量没必要 memo"]],
+"void-dom-elements-no-children":["空元素上写了子元素","cor",["<img src={url}>文字</img>  // ✗ img 不能有子元素"]],
+"void-use-memo":["useMemo 里没有返回值","cor",["useMemo(() => { doSomething(); }, []);  // ✗ 没有返回值，这种场景该用 useEffect"]],
+"button-has-type":["button 没有写 type","res",["<button>提交</button>  // ✗ 默认是 submit，在表单里会意外提交"]],
+"forbid-component-props":["组件用了被禁用的 prop","res",["<Card className=\"x\" />  // ✗ 团队禁止直接传 className"]],
+"forbid-dom-props":["DOM 元素用了被禁用的属性","res",["<div className=\"x\" />  // ✗ 团队要求统一走 CSS Modules"]],
+"forbid-elements":["用了被禁用的元素","res",["<a href=\"/x\">链接</a>  // ✗ 团队要求统一用 <Link>"]],
+"invariant":["违反了项目约定的固定写法","res",["<Button>确定</Button>  // ✗ 该写 <Button size=\"m\">确定</Button>"]],
+"jsx-filename-extension":["JSX 写在了非 JSX 文件里","res",["// App.js","return <div />;  // ✗ 含 JSX 的文件该用 .jsx 或 .tsx"]],
+"jsx-no-literals":["JSX 里直接写死了文案","res",["<h1>欢迎回来</h1>  // ✗ 文案该走 i18n"]],
+"no-clone-element":["用了 cloneElement","res",["React.cloneElement(child, { x: 1 });  // ✗ 隐式注入 prop，很难追踪来源"]],
+"no-danger":["用了 dangerouslySetInnerHTML","res",["<div dangerouslySetInnerHTML={{ __html: html }} />  // ✗ XSS 风险"]],
+"no-multi-comp":["一个文件里定义了多个组件","res",["export function A() { return <div />; }","export function B() { return <div />; }  // ✗ 一个文件一个组件"]],
+"no-react-children":["用了 React.Children 工具","res",["React.Children.map(children, (c) => c);  // ✗ 团队要求显式传数组"]],
+"no-unknown-property":["用了不存在的 DOM 属性","res",["<label for={id}>名称</label>  // ✗ React 里该写 htmlFor"]],
+"only-export-components":["文件里导出了非组件内容","res",["export const helper = () => 1;  // ✗ 该文件只导出组件，否则热更新会失效"]],
+"prefer-function-component":["用了 class 组件","res",["class App extends React.Component {  // ✗ 该用函数组件","  render() { return <div />; }","}"]],
+"rule-suppression":["用注释压制了 lint 规则","res",["// oxlint-disable-next-line react/no-danger","<div dangerouslySetInnerHTML={{ __html: x }} />  // ✗ 禁止用注释绕过规则"]],
+"syntax":["用了被禁止的语法","res",["const App = () => <div />;  // ✗ 团队要求用 function 声明"]],
+"todo":["代码里留着 TODO","res",["// TODO: 改成受控组件  // ✗ 提交前该处理掉"]],
+"unsupported-syntax":["用了编译器不支持的语法","res",["const App = () => { eval('1'); return <div />; };  // ✗ eval 会阻断编译优化"]],
+"checked-requires-onchange-or-readonly":["checked 没配 onChange 或 readOnly","ped",["<input type=\"checkbox\" checked={done} />  // ✗ 缺 onChange，React 会警告并变成只读"]],
+"display-name":["组件缺少 displayName","ped",["const App = memo(() => <div />);  // ✗ 该补 App.displayName = 'App'，否则调试面板显示 Anonymous"]],
+"jsx-no-target-blank":["target=_blank 没加 rel","ped",["<a href={url} target=\"_blank\">外链</a>  // ✗ 缺 rel=\"noreferrer\"，新页面能拿到 window.opener"]],
+"jsx-no-useless-fragment":["多余的 Fragment","ped",["return <><div /></>;  // ✗ 只有一个子元素，Fragment 是多余的"]],
+"no-unescaped-entities":["JSX 里有未转义的特殊字符","ped",["<p>这里用 > 号</p>  // ✗ 该写成 &gt;"]],
+"rules-of-hooks":["Hook 调用位置不合法","ped",["if (ok) {","  useEffect(() => {}, []);  // ✗ Hook 不能在条件里调用","}"]],
+"function-component-definition":["函数组件的定义方式不统一","sty",["const App = function () { return <div />; };  // ✗ 统一用 function App() {}"]],
+"hook-use-state":["useState 的解构命名不匹配","sty",["const [count, setValue] = useState(0);  // ✗ setter 该叫 setCount"]],
+"jsx-boolean-value":["布尔属性写成了 ={true}","sty",["<Button disabled={true} />  // ✗ 直接写 disabled"]],
+"jsx-curly-brace-presence":["字符串属性多了花括号","sty",["<Card title={\"标题\"} />  // ✗ 字符串字面量不需要花括号"]],
+"jsx-fragments":["用 React.Fragment 而不是简写","sty",["<React.Fragment><div /></React.Fragment>  // ✗ 该用 <>"]],
+"jsx-handler-names":["事件处理函数命名不规范","sty",["<Button onClick={submit} />  // ✗ onClick 对应的函数该叫 handleSubmit"]],
+"jsx-max-depth":["JSX 嵌套层数太深","sty",["<div><div><div><div><div><div><div /></div></div></div></div></div></div>  // ✗ 超过最大深度，该拆组件"]],
+"jsx-pascal-case":["组件名不是 PascalCase","sty",["<my_button />  // ✗ 该写 MyButton"]],
+"jsx-props-no-spreading":["用了 props 展开","sty",["<Card {...props} />  // ✗ 团队要求显式列出每个 prop"]],
+"no-redundant-should-component-update":["多余的 shouldComponentUpdate","sty",["class A extends React.PureComponent {","  shouldComponentUpdate() { return true; }  // ✗ PureComponent 已经做了浅比较","}"]],
+"no-set-state":["组件里用了 this.setState","sty",["this.setState({ n: 1 });  // ✗ 团队要求统一用 Hooks"]],
+"prefer-es6-class":["用了 createReactClass","sty",["const App = createReactClass({ render() { return <div />; } });  // ✗ 该用 class 或函数组件"]],
+"self-closing-comp":["没有子元素却没有自闭合","sty",["<MyComp></MyComp>  // ✗ 该写 <MyComp />"]],
+"state-in-constructor":["state 初始化位置不符合约定","sty",["class A extends React.Component {","  state = { n: 0 };  // ✗ 该在 constructor 里写 this.state = {}","}"]],
+"import-style":["import 风格不统一","res",["import * as path from 'node:path';  // ✗ 团队约定用 import { join } from 'node:path'"]],
+"no-abusive-eslint-disable":["eslint-disable 没有指定规则名","res",["// eslint-disable  // ✗ 没写规则名，会把整个文件全部关掉"]],
+"no-anonymous-default-export":["匿名的默认导出","res",["export default () => {};  // ✗ 报错栈里看不出这是哪个模块"]],
+"no-array-for-each":["用了 forEach","res",["items.forEach((x) => use(x));  // ✗ 团队约定用 for...of，能提前 break"]],
+"no-array-reduce":["用了 reduce","res",["const sum = arr.reduce((a, b) => a + b, 0);  // ✗ reduce 可读性差，团队禁用"]],
+"no-document-cookie":["直接操作 document.cookie","res",["document.cookie = 'token=1';  // ✗ 该走统一的存储封装，方便加过期和加密"]],
+"no-length-as-slice-end":["slice 用 length 当终点","res",["arr.slice(1, arr.length);  // ✗ 直接写 arr.slice(1)"]],
+"no-magic-array-flat-depth":["flat 传了魔法数字","res",["arr.flat(2);  // ✗ 2 该提取成有名字的常量"]],
+"no-process-exit":["用了 process.exit","res",["process.exit(1);  // ✗ 会跳过清理逻辑，该设置 process.exitCode 后正常返回"]],
+"no-useless-error-capture-stack-trace":["手动调用了 captureStackTrace","res",["Error.captureStackTrace(this, MyError);  // ✗ 现代引擎已经自动捕获，没必要"]],
+"prefer-modern-math-apis":["用老写法算数学函数","res",["const n = Math.log(x) / Math.LN10;  // ✗ 该用 Math.log10(x)"]],
+"prefer-module":["用 module 判断模块类型","res",["if (typeof module !== 'undefined') { }  // ✗ 该用 import.meta"]],
+"prefer-node-protocol":["引入内置模块没加 node: 前缀","res",["import fs from 'fs';  // ✗ 该写 'node:fs'，能一眼区分内置模块和依赖"]],
+"prefer-number-properties":["用全局函数做数字转换","res",["isNaN(x);  // ✗ 该用 Number.isNaN(x)","parseInt(s);  // ✗ 该用 Number.parseInt(s)"]],
+"consistent-assert":["assert 的写法前后不一致","ped",["import assert from 'node:assert';","assert(x);  // ✗ 统一用 assert.ok(x)"]],
+"consistent-empty-array-spread":["空数组兜底的写法不一致","ped",["const list = [...(maybe || [])];  // ✗ 团队约定统一写 ...(maybe ?? [])"]],
+"escape-case":["转义序列的字母大小写不统一","ped",["const s = '\\x1f';  // ✗ 统一用大写 \\x1F"]],
+"explicit-length-check":["隐式的长度判断","ped",["if (arr.length) { }  // ✗ 该写 arr.length > 0，意图更明确"]],
+"new-for-builtins":["对内置类型用了 new","ped",["new Array(3);  // ✗ 该写 Array.from({ length: 3 })"]],
+"no-array-callback-reference":["回调直接传了函数引用","ped",["['1', '2'].map(parseInt);  // ✗ parseInt 会收到 index，结果全错"]],
+"no-hex-escape":["用十六进制转义表示可打印字符","ped",["const s = '\\x41';  // ✗ 这就是字符 A，直接写就行"]],
+"no-immediate-mutation":["创建后立刻修改","ped",["const a = [];","a.push(1);  // ✗ 该直接写 const a = [1]"]],
+"no-instanceof-array":["用 instanceof 判断数组","ped",["if (x instanceof Array) { }  // ✗ 该用 Array.isArray(x)，跨窗口也准"]],
+"no-negation-in-equality-check":["相等判断里带取反","ped",["if (!a === !b) { }  // ✗ 几乎肯定是写错了"]],
+"no-new-buffer":["用 new Buffer 创建缓冲区","ped",["new Buffer(10);  // ✗ 已废弃且有安全问题，该用 Buffer.alloc(10)"]],
+"no-object-as-default-parameter":["参数默认值是对象字面量","ped",["function f(opts = {}) { }  // ✗ 每次调用都新建对象，容易误以为能共享状态"]],
+"no-static-only-class":["只有静态成员的类","ped",["class Utils {","  static max(a, b) { return a > b ? a : b; }  // ✗ 该写成普通函数","}"]],
+"no-this-assignment":["把 this 赋给了变量","ped",["const self = this;  // ✗ 该用箭头函数，或者提前解构出需要的属性"]],
+"no-typeof-undefined":["用 typeof 判断 undefined","ped",["if (typeof x === 'undefined') { }  // ✗ 该写 x === undefined"]],
+"no-unnecessary-array-flat-depth":["flat 传了多余的深度","ped",["arr.flat(1);  // ✗ 默认就是 1，不用写"]],
+"no-unnecessary-array-splice-count":["splice 传了多余的删除个数","ped",["arr.splice(0, arr.length);  // ✗ 该写 arr.length = 0"]],
+"no-unnecessary-slice-end":["slice 传了多余的终点","ped",["arr.slice(1, arr.length);  // ✗ 直接写 arr.slice(1)"]],
+"no-unreadable-iife":["难读的立即执行函数写法","ped",["!function () { }();  // ✗ 太绕了，该写 (() => {})()"]],
+"no-useless-promise-resolve-reject":["Promise 里多余的 resolve 包装","ped",["new Promise((resolve) => resolve(fetchData()));  // ✗ 直接 return fetchData()"]],
+"no-useless-switch-case":["多余的 switch case","ped",["switch (x) {","  case 1:","  default:  // ✗ case 1 和 default 行为一样，合并掉","    break;","}"]],
+"no-useless-undefined":["多余的 undefined","ped",["function f() { return undefined; }  // ✗ 直接 return"]],
+"prefer-array-flat":["用 concat 展平数组","ped",["const all = [].concat(...matrix);  // ✗ 该用 matrix.flat()"]],
+"prefer-array-some":["用 filter 判断是否存在","ped",["if (arr.filter((x) => x > 0).length > 0) { }  // ✗ 该用 arr.some((x) => x > 0)"]],
+"prefer-at":["用下标取末尾元素","ped",["const last = arr[arr.length - 1];  // ✗ 该用 arr.at(-1)"]],
+"prefer-blob-reading-methods":["用 FileReader 读 Blob","ped",["const reader = new FileReader();","reader.readAsText(blob);  // ✗ 该用 await blob.text()"]],
+"prefer-code-point":["用 charCodeAt 取码点","ped",["const code = s.charCodeAt(0);  // ✗ 该用 s.codePointAt(0)，能正确处理 emoji"]],
+"prefer-date-now":["用 new Date().getTime()","ped",["const t = new Date().getTime();  // ✗ 该用 Date.now()"]],
+"prefer-dom-node-append":["用 appendChild 插入节点","ped",["parent.appendChild(child);  // ✗ 该用 parent.append(child)，还能一次插多个"]],
+"prefer-dom-node-dataset":["用 setAttribute 设置 data 属性","ped",["el.setAttribute('data-id', '1');  // ✗ 该用 el.dataset.id = '1'"]],
+"prefer-dom-node-remove":["用 removeChild 移除自己","ped",["parent.removeChild(el);  // ✗ 该用 el.remove()"]],
+"prefer-event-target":["自己实现事件订阅机制","ped",["class Emitter {","  on() {}","  emit() {}  // ✗ 该直接继承 EventTarget","}"]],
+"prefer-import-meta-properties":["手动从 import.meta.url 拼路径","ped",["const dir = new URL('.', import.meta.url).pathname;  // ✗ 该用 import.meta.dirname"]],
+"prefer-math-min-max":["用三元取最大最小值","ped",["const m = a > b ? a : b;  // ✗ 该用 Math.max(a, b)"]],
+"prefer-math-trunc":["用位运算取整","ped",["const n = x | 0;  // ✗ 超出 32 位会出错，该用 Math.trunc(x)"]],
+"prefer-native-coercion-functions":["手写类型转换函数","ped",["arr.map((x) => String(x));  // ✗ 该写 arr.map(String)"]],
+"prefer-number-coercion":["用加号把字符串转数字","ped",["const n = +str;  // ✗ 该用 Number(str)，意图更明确"]],
+"prefer-prototype-methods":["借用原型方法处理数组","ped",["const copy = Array.prototype.slice.call(arr);  // ✗ 该用 [...arr]"]],
+"prefer-query-selector":["用 getElementById 取元素","ped",["document.getElementById('app');  // ✗ 团队约定统一用 querySelector"]],
+"prefer-regexp-test":["用 match 判断是否匹配","ped",["if (str.match(/^\\d+$/)) { }  // ✗ 该用 /^\\d+$/.test(str)"]],
+"prefer-single-call":["连续多次调用同一个方法","ped",["arr.push(1);","arr.push(2);  // ✗ 合并成 arr.push(1, 2)"]],
+"prefer-string-replace-all":["用全局正则做全部替换","ped",["str.replace(/-/g, '_');  // ✗ 该用 str.replaceAll('-', '_')"]],
+"prefer-string-slice":["用 substring 截取字符串","ped",["str.substring(1, 3);  // ✗ 该用 str.slice(1, 3)，参数含义更一致"]],
+"prefer-top-level-await":["套一层 async 函数只为 await","ped",["async function main() { await init(); }","main();  // ✗ ESM 里直接写顶层 await init()"]],
+"prefer-type-error":["参数类型错误抛了普通 Error","ped",["if (typeof x !== 'number') throw new Error('必须是数字');  // ✗ 该用 TypeError"]],
+"require-number-to-fixed-digits-argument":["toFixed 没有传位数","ped",["price.toFixed();  // ✗ 该显式写 toFixed(2)"]],
+"catch-error-name":["catch 参数命名不规范","ped",["try { } catch (e) { }  // ✗ 团队约定叫 error"]],
+"consistent-date-clone":["复制 Date 的写法不一致","sty",["const d2 = new Date(d1.getTime());  // ✗ 该用 new Date(d1)"]],
+"consistent-existence-index-check":["判断元素是否存在的写法不一致","sty",["if (arr.indexOf(x) !== -1) { }  // ✗ 团队统一用 arr.includes(x)"]],
+"consistent-template-literal-escape":["模板字符串里反引号的转义写法不统一","sty",["const s = `a\\`b`;  // ✗ 团队约定改用 ${'`'} 避免反斜杠转义"]],
+"custom-error-definition":["自定义错误类的定义不完整","sty",["class MyError extends Error {","  constructor(msg) { super(msg); }  // ✗ 缺少 this.name = 'MyError'，堆栈里会显示 Error","}"]],
+"empty-brace-spaces":["空大括号里有多余空格","sty",["const o = {  };  // ✗ 该写 {}"]],
+"error-message":["抛错时没有写消息","sty",["throw new Error();  // ✗ 没有消息，排查时完全不知道发生了什么"]],
+"explicit-timer-delay":["setTimeout 没传延迟时间","sty",["setTimeout(fn);  // ✗ 该显式写 setTimeout(fn, 0)"]],
+"filename-case":["文件名大小写不符合约定","sty",["// UserProfile.ts  // ✗ 团队约定文件名用 kebab-case：user-profile.ts"]],
+"max-nested-calls":["函数嵌套调用太深","sty",["foo(bar(baz(qux(1))));  // ✗ 嵌套过深，拆成中间变量"]],
+"no-array-method-this-argument":["数组方法传了 thisArg","sty",["arr.map(fn, thisArg);  // ✗ 该用箭头函数捕获 this"]],
+"no-await-expression-member":["直接取 await 结果的成员","sty",["const name = (await getUser()).name;  // ✗ 先赋值再取，报错时更容易定位"]],
+"no-console-spaces":["console 参数里有多余空格","sty",["console.log('a', ' b');  // ✗ 逗号本身就会加空格，这里会变成两个空格"]],
+"no-null":["用了 null","sty",["const v = null;  // ✗ 团队约定统一用 undefined，避免两套空值"]],
+"no-unreadable-array-destructuring":["数组解构跳过太多元素","sty",["const [, , , , x] = arr;  // ✗ 完全数不清第几个，该用下标或对象解构"]],
+"no-useless-collection-argument":["集合构造传了空参数","sty",["new Map([]);  // ✗ 空数组是多余的，直接 new Map()"]],
+"no-zero-fractions":["写了 .0 这种零小数","sty",["const n = 1.0;  // ✗ 直接写 1"]],
+"number-literal-case":["数字字面量的前缀大小写不统一","sty",["const n = 0XFF;  // ✗ 统一用小写 0xff"]],
+"numeric-separators-style":["长数字没有加分隔符","sty",["const n = 1000000;  // ✗ 该写 1_000_000，一眼能数清位数"]],
+"prefer-array-index-of":["用 findIndex 找原始值的下标","sty",["const i = arr.findIndex((x) => x === v);  // ✗ 原始值该用 arr.indexOf(v)"]],
+"prefer-bigint-literals":["用 BigInt() 构造大整数","sty",["const n = BigInt(1);  // ✗ 该写 1n"]],
+"prefer-class-fields":["在构造函数里赋值成员变量","sty",["class A {","  constructor() { this.x = 1; }  // ✗ 该用类字段 x = 1","}"]],
+"prefer-classlist-toggle":["用 add / remove 切换 class","sty",["if (on) el.classList.add('active');","else el.classList.remove('active');  // ✗ 该用 el.classList.toggle('active', on)"]],
+"prefer-default-parameters":["在函数体里给参数兜底","sty",["function f(x) {","  x = x || 1;  // ✗ 该写 function f(x = 1)","}"]],
+"prefer-dom-node-text-content":["用 innerText 写文本","sty",["el.innerText = 'hi';  // ✗ 该用 textContent，不会触发重排"]],
+"prefer-export-from":["先 import 再 export 同一个东西","sty",["import { a } from './a';","export { a };  // ✗ 该写 export { a } from './a'"]],
+"prefer-global-this":["用 window 或 global 访问全局","sty",["window.foo = 1;  // ✗ 该用 globalThis.foo，跨环境通用"]],
+"prefer-keyboard-event-key":["用已废弃的 keyCode","sty",["if (e.keyCode === 13) { }  // ✗ 该用 e.key === 'Enter'"]],
+"prefer-logical-operator-over-ternary":["用三元做逻辑兜底","sty",["const v = x ? x : y;  // ✗ 该写 x || y"]],
+"prefer-modern-dom-apis":["用老的 DOM API","sty",["el.replaceChild(newNode, oldNode);  // ✗ 该用 oldNode.replaceWith(newNode)"]],
+"prefer-negative-index":["用正向索引取末尾","sty",["arr.slice(arr.length - 2);  // ✗ 该用 arr.slice(-2)"]],
+"prefer-object-from-entries":["手动循环构造对象","sty",["const o = {};","for (const [k, v] of entries) o[k] = v;  // ✗ 该用 Object.fromEntries(entries)"]],
+"prefer-optional-catch-binding":["catch 写了参数却没用到","sty",["try { } catch (e) { }  // ✗ 没用到 e，该写 catch { }"]],
+"prefer-reflect-apply":["用 Function.prototype.apply","sty",["fn.apply(null, args);  // ✗ 该用 Reflect.apply(fn, null, args)"]],
+"prefer-response-static-json":["手动构造 JSON 响应","sty",["new Response(JSON.stringify(data));  // ✗ 该用 Response.json(data)"]],
+"prefer-string-raw":["用双反斜杠写 Windows 路径","sty",["const p = 'C:\\\\Users\\\\me';  // ✗ 该用 String.raw 标签模板，不用转义"]],
+"prefer-string-trim-start-end":["用已废弃的 trimLeft / trimRight","sty",["str.trimLeft();  // ✗ 该用 str.trimStart()"]],
+"prefer-structured-clone":["用 JSON 做深拷贝","sty",["const copy = JSON.parse(JSON.stringify(obj));  // ✗ 会丢 Date 和 undefined，该用 structuredClone(obj)"]],
+"prefer-ternary":["用 if/else 给变量赋值","sty",["let v;","if (ok) { v = 1; } else { v = 2; }  // ✗ 该写 const v = ok ? 1 : 2"]],
+"relative-url-style":["相对路径里有多余的上级跳转","sty",["import x from './foo/../bar';  // ✗ 该写 './bar'"]],
+"require-array-join-separator":["join 没有传分隔符","sty",["arr.join();  // ✗ 默认是逗号，该显式写 join(',')"]],
+"require-module-attributes":["import JSON 没写模块属性","sty",["import data from './data.json';  // ✗ 该写 with { type: 'json' }"]],
+"switch-case-braces":["case 里缺大括号","sty",["switch (x) {","  case 1:","    const a = 1;  // ✗ case 里声明变量该用大括号包住","    break;","}"]],
+"switch-case-break-position":["break 和语句挤在同一行","sty",["switch (x) {","  case 1:","    doSomething(); break;  // ✗ break 该单独一行","}"]],
+"text-encoding-identifier-case":["编码名大小写不规范","sty",["new TextDecoder('UTF-8');  // ✗ 统一写小写 'utf-8'"]],
+"throw-new-error":["throw 时没有 new","sty",["throw Error('x');  // ✗ 该写 throw new Error('x')"]],
+"explicit-function-return-type":["函数没有显式标注返回类型","res",["function add(a: number, b: number) { return a + b; }  // ✗ 该显式写 : number"]],
+"explicit-member-accessibility":["类成员没写访问修饰符","res",["class A {","  name = '';  // ✗ 该显式写 public / private，别靠默认值","}"]],
+"explicit-module-boundary-types":["导出的函数没标参数和返回类型","res",["export function load(id) { }  // ✗ 对外暴露的 API 必须显式标注类型"]],
+"no-dynamic-delete":["用 delete 删除动态 key","res",["delete obj[key];  // ✗ 破坏对象的隐藏类，性能变差，该重建对象"]],
+"no-empty-object-type":["用了空对象类型","res",["type Options = {};  // ✗ 几乎所有值都能赋给它，该用 Record<string, never>"]],
+"no-explicit-any":["用了 any","res",["function parse(data: any) { }  // ✗ 该用 unknown，用之前先收窄"]],
+"no-import-type-side-effects":["import type 里混进了值导入","res",["import type { A, someValue } from './mod';  // ✗ someValue 是值，不能放在 type import 里"]],
+"no-invalid-void-type":["void 用在了不该出现的位置","res",["function f(): void | number { }  // ✗ void 不能出现在联合类型里"]],
+"no-namespace":["用了 namespace","res",["namespace Utils { }  // ✗ 该用 ES 模块"]],
+"no-non-null-asserted-nullish-coalescing":["非空断言和 ?? 一起用","res",["const v = obj!.name ?? 'x';  // ✗ ! 已经保证非空，?? 永远用不上"]],
+"no-non-null-assertion":["用了非空断言","res",["const el = document.querySelector('.x')!;  // ✗ 只是骗过编译器，运行时照样可能是 null"]],
+"no-require-imports":["用 require 引入模块","res",["const fs = require('fs');  // ✗ ESM 里该用 import"]],
+"no-restricted-types":["用了被禁用的类型","res",["type Id = Function;  // ✗ Function 在禁用类型列表里，该写具体签名"]],
+"no-var-requires":["用 const x = require() 引入模块","res",["const path = require('path');  // ✗ 该用 import"]],
+"non-nullable-type-assertion-style":["该用非空断言却用了 as","res",["const v = maybe as string;  // ✗ 类型是 string | null 时，该写 maybe!"]],
+"prefer-literal-enum-member":["enum 成员用了表达式","res",["enum E { A = 1 + 1 }  // ✗ 该写常量字面量"]],
+"promise-function-async":["返回 Promise 的函数没标 async","res",["function load(): Promise<Data> { return fetchData(); }  // ✗ 该加 async"]],
+"use-unknown-in-catch-callback-variable":["catch 回调参数类型写得太窄","res",["p.catch((err: Error) => { });  // ✗ 实际可能抛出任何值，该写 unknown"]],
+"ban-ts-comment":["用了 @ts-ignore 这类注释","ped",["// @ts-ignore  // ✗ 该用 @ts-expect-error，多余时能被发现"]],
+"ban-types":["用了被禁用的宽泛类型","ped",["function f(cb: Function) { }  // ✗ 该写具体签名 (x: number) => void"]],
+"no-confusing-void-expression":["把 void 表达式当成值使用","ped",["const x = console.log('hi');  // ✗ 得到的是 undefined，很容易误解"]],
+"no-deprecated":["调用了标记为废弃的 API","ped",["oldApi();  // ✗ 已标记 @deprecated，该换成 newApi()"]],
+"no-misused-promises":["把 Promise 用在了期望布尔的地方","ped",["if (fetchData()) { }  // ✗ Promise 永远为真，该写 if (await fetchData())"]],
+"no-mixed-enums":["同一个 enum 混用数字和字符串","ped",["enum E { A = 1, B = 'b' }  // ✗ 混用之后比较容易出错"]],
+"no-unsafe-argument":["把 any 传给了有类型的参数","ped",["function f(n: number) { }","f(anyValue);  // ✗ any 流进来，参数类型检查形同虚设"]],
+"no-unsafe-assignment":["把 any 赋给了有类型的变量","ped",["const n: number = anyValue;  // ✗ any 一进来，后面全都不受检查"]],
+"no-unsafe-call":["调用了 any 类型的值","ped",["anyFn();  // ✗ 参数和返回值都不受类型检查"]],
+"no-unsafe-function-type":["用了宽泛的 Function 类型","ped",["let cb: Function;  // ✗ 该写 (x: number) => void"]],
+"no-unsafe-member-access":["访问 any 值的成员","ped",["anyObj.foo.bar;  // ✗ 整条访问链都不受检查"]],
+"no-unsafe-return":["返回了 any","ped",["function f(): number { return anyValue; }  // ✗ any 混进了返回值"]],
+"only-throw-error":["throw 了非 Error 的值","ped",["throw '出错了';  // ✗ 该写 throw new Error('出错了')"]],
+"prefer-enum-initializers":["enum 成员没有显式值","ped",["enum Status { Ok, Fail }  // ✗ 该显式写 Ok = 0, Fail = 1"]],
+"prefer-includes":["用 indexOf 判断是否存在","ped",["if (arr.indexOf(x) !== -1) { }  // ✗ 该用 arr.includes(x)"]],
+"prefer-nullish-coalescing":["用 || 给可能为 0 的值兜底","ped",["const port = config.port || 3000;  // ✗ port 是 0 时会被错误替换，该用 ?? 3000"]],
+"prefer-readonly-parameter-types":["参数类型没标 readonly","ped",["function f(items: string[]) { items.push('x'); }  // ✗ 该写 readonly string[]，防止意外修改"]],
+"prefer-ts-expect-error":["用了 @ts-ignore","ped",["// @ts-ignore  // ✗ 该用 @ts-expect-error"]],
+"related-getter-setter-pairs":["getter 和 setter 的类型不一致","ped",["class A {","  get v(): string { return ''; }","  set v(x: number) { }  // ✗ 读写类型必须一致","}"]],
+"restrict-plus-operands":["用加号拼接类型不明确的值","ped",["const s = a + b;  // ✗ 类型不明确时可能变成数字相加，该用模板字符串"]],
+"return-await":["try 里 return 没加 await","ped",["async function f() {","  try { return g(); } catch { }  // ✗ try 里必须 return await，否则 catch 抓不到","}"]],
+"strict-boolean-expressions":["用非布尔值直接做条件","ped",["if (str) { }  // ✗ 空字符串为假，容易漏判，该写 str !== ''"]],
+"strict-void-return":["返回 void 的函数里写了返回值","ped",["function f(): void { return 1; }  // ✗ void 函数不该有返回值"]],
+"switch-exhaustiveness-check":["switch 没有覆盖所有情况","ped",["type T = 'a' | 'b';","switch (x) { case 'a': break; }  // ✗ 漏了 'b'，也没有 default"]],
+"adjacent-overload-signatures":["重载签名被其他声明隔开了","sty",["function f(a: string): void;","function g(): void;","function f(a: number): void;  // ✗ 重载签名必须挨在一起"]],
+"array-type":["数组类型写法不统一","sty",["const a: Array<string> = [];  // ✗ 该写 string[]"]],
+"ban-tslint-comment":["留着 tslint 的注释","sty",["// tslint:disable-next-line  // ✗ tslint 早就废弃了，删掉"]],
+"class-literal-property-style":["用 getter 返回常量字面量","sty",["class A {","  get name() { return 'x'; }  // ✗ 该写 readonly name = 'x'","}"]],
+"consistent-generic-constructors":["泛型写了两遍","sty",["const m: Map<string, number> = new Map<string, number>();  // ✗ 只在一边写就够"]],
+"consistent-indexed-object-style":["索引签名写法不统一","sty",["interface Dict { [key: string]: number }  // ✗ 团队约定用 Record<string, number>"]],
+"consistent-type-assertions":["类型断言写法不统一","sty",["const el = <HTMLDivElement>node;  // ✗ 团队约定统一用 as"]],
+"consistent-type-definitions":["interface 和 type 混用","sty",["interface Props { a: string }  // ✗ 团队约定统一用 type"]],
+"consistent-type-exports":["导出类型时没加 type","sty",["export { User };  // ✗ User 只是类型，该写 export type { User }"]],
+"consistent-type-imports":["导入类型时没加 type","sty",["import { User } from './types';  // ✗ User 只是类型，该写 import type"]],
+"dot-notation":["用方括号访问属性","sty",["obj['name'];  // ✗ 该写 obj.name"]],
+"method-signature-style":["方法签名写成了属性形式","sty",["interface I { onClick: () => void }  // ✗ 团队约定用 onClick(): void"]],
+"no-empty-interface":["空的 interface","sty",["interface Props {}  // ✗ 空接口等于没定义，该用 type Props = {}"]],
+"no-inferrable-types":["类型可以推断却写了出来","sty",["const n: number = 1;  // ✗ 从 1 已经能推断出 number"]],
+"no-unnecessary-qualifier":["多余的命名空间前缀","sty",["namespace A {","  export const x = 1;","  export const y = A.x;  // ✗ 在 A 内部不需要写 A.","}"]],
+"parameter-properties":["构造函数里重复声明和赋值","sty",["class A {","  private x: number;","  constructor(x: number) { this.x = x; }  // ✗ 该用参数属性 constructor(private x: number)","}"]],
+"prefer-find":["用 filter 取第一个元素","sty",["const user = users.filter((u) => u.id === id)[0];  // ✗ 该用 find"]],
+"prefer-for-of":["用下标循环遍历数组","sty",["for (let i = 0; i < arr.length; i++) { use(arr[i]); }  // ✗ 该用 for...of"]],
+"prefer-function-type":["接口里只放了一个调用签名","sty",["interface Fn { (x: number): void }  // ✗ 该用 type Fn = (x: number) => void"]],
+"prefer-readonly":["从没被重新赋值的成员没标 readonly","sty",["class A {","  name = 'x';  // ✗ 从没改过，该加 readonly","}"]],
+"prefer-reduce-type-parameter":["用 as 断言 reduce 的初值类型","sty",["arr.reduce((acc, x) => acc.concat(x), [] as string[]);  // ✗ 该写 reduce<string[]>(...)" ]],
+"prefer-regexp-exec":["用 String.match 提取匹配","sty",["const m = str.match(/x/);  // ✗ 团队约定用 /x/.exec(str)"]],
+"prefer-return-this-type":["链式方法返回了基类类型","sty",["class A {","  set(v: number): A { return this; }  // ✗ 该返回 this 类型，否则子类链式调用会丢类型","}"]],
+"unified-signatures":["多个重载可以合并成一个","sty",["function f(a: string): void;","function f(a: number): void;  // ✗ 可以合并成 function f(a: string | number)"]],
+"bad-bitwise-operator":["位运算优先级容易看错","res",["const mask = a | b & c;  // ✗ & 优先级高于 |，该加括号明确意图"]],
+"no-async-await":["用了 async / await","res",["async function f() { await g(); }  // ✗ 团队约定统一用 Promise 链"]],
+"no-barrel-file":["用了桶文件统一再导出","res",["export * from './a';","export * from './b';  // ✗ 桶文件会拖慢构建和热更新"]],
+"no-const-enum":["用了 const enum","res",["const enum E { A }  // ✗ 跨模块引用时容易出问题，该用普通 enum 或常量对象"]],
+"no-optional-chaining":["用了可选链","res",["obj?.a?.b;  // ✗ 团队约定显式判空"]],
+"no-rest-spread-properties":["对象解构里用了 rest","res",["const { a, ...rest } = obj;  // ✗ 团队约定显式列出需要的字段"]],
+"branches-sharing-code":["多个分支里有重复代码","ped",["if (a) { doX(); doY(); } else { doX(); doZ(); }  // ✗ doX() 重复，该提到分支外面"]],
+"default":["模块没有默认导出却被默认导入","cor",["import foo from './mod';  // ✗ mod 只有命名导出，根本没有 default"]],
+"namespace":["命名空间导入用错了","cor",["import * as x from './mod';  // ✗ 该模块没有可用的命名空间导出"]],
+"extensions":["import 路径带了扩展名","res",["import a from './a.ts';  // ✗ 团队约定省略扩展名"]],
+"no-amd":["用了 AMD 模块风格","res",["define(['a'], function (a) { });  // ✗ 该用 ESM"]],
+"no-commonjs":["用了 CommonJS 导出","res",["module.exports = {};  // ✗ 该用 export default"]],
+"no-cycle":["存在循环依赖","res",["// a.ts 里","import { b } from './b';  // ✗ b.ts 又 import 了 a.ts，形成环"]],
+"no-default-export":["用了默认导出","res",["export default {};  // ✗ 团队约定只用命名导出"]],
+"no-dynamic-require":["用了动态 require","res",["require(`./locales/${lang}`);  // ✗ 打包工具无法静态分析，会漏打文件"]],
+"no-relative-parent-imports":["用 ../ 引入上级目录","res",["import { x } from '../../lib/x';  // ✗ 该用路径别名 @/lib/x"]],
+"no-webpack-loader-syntax":["import 里写了 loader 语法","res",["import txt from 'raw-loader!./a.txt';  // ✗ 该在构建配置里声明"]],
+"unambiguous":["模块类型不明确","res",["import x from './x';","module.exports = {};  // ✗ ESM 和 CJS 混用，模块类型判断会失效"]],
+"max-dependencies":["一个文件依赖了太多模块","ped",["import a from './a';","import b from './b';  // ✗ 超过上限，说明这个文件职责太重"]],
+"no-duplicates":["同一个模块被导入两次","sty",["import { a } from './mod';","import { b } from './mod';  // ✗ 合并成一行"]],
+"alt-text":["img 缺少 alt","cor",["<img src={url} />  // ✗ 缺 alt，屏幕阅读器读不出图片内容"]],
+"anchor-has-content":["a 标签里没有任何内容","cor",["<a href=\"/x\" />  // ✗ 空链接，读屏软件不知道要跳到哪"]],
+"anchor-is-valid":["a 的 href 不是有效链接","cor",["<a href=\"#\">点我</a>  // ✗ href=\"#\" 不是有效链接，该用 button"]],
+"aria-activedescendant-has-tabindex":["用了 aria-activedescendant 却没有 tabIndex","cor",["<div aria-activedescendant=\"item-1\" />  // ✗ 缺少 tabIndex，键盘根本聚焦不到"]],
+"aria-props":["aria 属性名拼错了","cor",["<div aria-lable=\"名称\" />  // ✗ 拼错了，应该是 aria-label"]],
+"aria-proptypes":["aria 属性的值类型不对","cor",["<div aria-hidden=\"yes\" />  // ✗ aria-hidden 只接受 true / false"]],
+"aria-role":["role 的值不存在","cor",["<div role=\"buton\" />  // ✗ 拼错了，应该是 button"]],
+"aria-unsupported-elements":["在不支持 aria 的元素上用了 aria","cor",["<meta aria-hidden=\"true\" />  // ✗ meta 不支持 aria 属性"]],
+"autocomplete-valid":["autocomplete 的值不合法","cor",["<input autocomplete=\"nmae\" />  // ✗ 拼错了，应该是 name"]],
+"click-events-have-key-events":["有 onClick 却没有对应的键盘事件","cor",["<div onClick={handle} />  // ✗ 只有鼠标能触发，键盘用户完全用不了"]],
+"control-has-associated-label":["表单控件没有可访问名称","cor",["<input type=\"text\" />  // ✗ 没有 label 也没有 aria-label，读屏读不出这是什么"]],
+"heading-has-content":["标题标签里没有内容","cor",["<h1 />  // ✗ 空标题，读屏软件读不出页面层级"]],
+"html-has-lang":["html 缺少 lang 属性","cor",["<html>  // ✗ 缺少 lang，读屏不知道用什么语言朗读"]],
+"iframe-has-title":["iframe 缺少 title","cor",["<iframe src={url} />  // ✗ 缺少 title，读屏无法描述这个框架的内容"]],
+"img-redundant-alt":["alt 里重复写了「图片」","cor",["<img src={url} alt=\"这是一张图片\" />  // ✗ 多余，直接描述图片内容就行"]],
+"interactive-supports-focus":["可交互元素无法获得焦点","cor",["<div onClick={handle} />  // ✗ 没有 tabIndex，键盘聚焦不到"]],
+"label-has-associated-control":["label 没有关联到控件","cor",["<label>邮箱</label>  // ✗ 没有 htmlFor，点标签不会聚焦输入框"]],
+"lang":["lang 的值不合法","cor",["<html lang=\"zh_CN\" />  // ✗ 该写 zh-CN，下划线不合法"]],
+"media-has-caption":["video / audio 没有字幕轨","cor",["<video src={url} />  // ✗ 缺少 track 字幕，听障用户没法用"]],
+"mouse-events-have-key-events":["有鼠标事件却没有对应的焦点事件","cor",["<div onMouseOver={show} />  // ✗ 键盘用户触发不了，该补 onFocus"]],
+"no-access-key":["用了 accessKey","cor",["<button accessKey=\"s\" />  // ✗ 会抢走浏览器和读屏软件的快捷键"]],
+"no-aria-hidden-on-focusable":["可聚焦元素上加了 aria-hidden","cor",["<button aria-hidden=\"true\" />  // ✗ 焦点能进去但读屏读不到，用户会迷失"]],
+"no-autofocus":["用了 autoFocus","cor",["<input autoFocus />  // ✗ 会抢走焦点，读屏用户找不到当前位置"]],
+"no-distracting-elements":["用了 marquee 或 blink","cor",["<marquee>公告</marquee>  // ✗ 干扰阅读且已废弃"]],
+"no-interactive-element-to-noninteractive-role":["给交互元素加了非交互 role","cor",["<button role=\"article\" />  // ✗ 按钮不该被声明成文章"]],
+"no-noninteractive-element-interactions":["给非交互元素绑了交互事件","cor",["<div role=\"article\" onClick={handle} />  // ✗ 语义是静态内容，却绑了点击"]],
+"no-noninteractive-element-to-interactive-role":["把非交互元素改成了交互 role","cor",["<div role=\"button\" />  // ✗ 该直接用 button 元素"]],
+"no-noninteractive-tabindex":["给非交互元素加了 tabIndex","cor",["<div tabIndex={0} />  // ✗ 静态内容不该进 Tab 顺序"]],
+"no-redundant-roles":["写了多余的 role","cor",["<button role=\"button\" />  // ✗ button 本来就是这个 role"]],
+"no-static-element-interactions":["静态元素上绑了点击事件","cor",["<div onClick={handle} />  // ✗ div 没有语义，该用 button"]],
+"prefer-tag-over-role":["能用标签却用了 role","cor",["<div role=\"button\" />  // ✗ 该直接用 button 标签"]],
+"role-has-required-aria-props":["role 缺少必需的 aria 属性","cor",["<div role=\"checkbox\" />  // ✗ 缺少 aria-checked"]],
+"role-supports-aria-props":["该 role 不支持这个 aria 属性","cor",["<div role=\"button\" aria-checked=\"true\" />  // ✗ button 不支持 aria-checked"]],
+"scope":["th 缺少 scope 属性","cor",["<th>姓名</th>  // ✗ 缺少 scope，读屏不知道这是行标题还是列标题"]],
+"tabindex-no-positive":["tabIndex 用了正数","cor",["<div tabIndex={3} />  // ✗ 正数会打乱自然的 Tab 顺序，只该用 0 或 -1"]],
+"anchor-ambiguous-text":["链接文字脱离上下文就看不明白","res",["<a href=\"/doc\">点击这里</a>  // ✗ 该写「查看文档」，单独听也能懂"]],
+"google-font-display":["Google Fonts 链接缺少 display 参数","cor",["<link href=\"https://fonts.googleapis.com/css2?family=Inter\" />  // ✗ 缺 &display=swap，首屏会出现白字"]],
+"google-font-preconnect":["没有预连接字体服务器","cor",["<link href=\"https://fonts.googleapis.com/css2?family=Inter\" />  // ✗ 该先 preconnect 到 fonts.gstatic.com"]],
+"inline-script-id":["内联 Script 缺少 id","cor",["<Script dangerouslySetInnerHTML={{ __html: code }} />  // ✗ 内联脚本必须给 id"]],
+"next-script-for-ga":["用普通 script 引 Google Analytics","cor",["<script src=\"https://www.googletagmanager.com/gtag/js\" />  // ✗ 该用 next/script"]],
+"no-assign-module-variable":["给 module 变量赋值","cor",["module = {};  // ✗ module 是保留变量，不能改"]],
+"no-async-client-component":["客户端组件写成了 async","cor",["'use client';","export default async function Page() { }  // ✗ 客户端组件不能是 async"]],
+"no-before-interactive-script-outside-document":["beforeInteractive 脚本放错了位置","cor",["<Script strategy=\"beforeInteractive\" />  // ✗ 该放到 _document 里"]],
+"no-css-tags":["手写 link 引样式表","cor",["<link rel=\"stylesheet\" href=\"/a.css\" />  // ✗ 该写 import './a.css'"]],
+"no-document-import-in-page":["页面里导入了 _document","cor",["import Document from './_document';  // ✗ 页面里不该引用 Document"]],
+"no-duplicate-head":["用了多个 Head","cor",["<Head /><Head />  // ✗ 一个页面只能有一个 Head"]],
+"no-head-element":["用了原生 head 标签","cor",["<head><title>x</title></head>  // ✗ 该用 next/head"]],
+"no-head-import-in-document":["_document 里导入了 Head","cor",["import Head from 'next/head';  // ✗ _document 里该用内置的 Html / Head 组件"]],
+"no-html-link-for-pages":["用 a 标签跳站内页面","cor",["<a href=\"/about\">关于</a>  // ✗ 该用 next/link，否则会整页刷新"]],
+"no-img-element":["用 img 而不是 next/image","cor",["<img src=\"/a.png\" />  // ✗ 该用 next/image，否则没有自动优化和懒加载"]],
+"no-page-custom-font":["在页面里引入自定义字体","cor",["<link href=\"https://fonts.googleapis.com/...\" />  // ✗ 该放到 _document 里"]],
+"no-script-component-in-head":["Head 里放了 Script","cor",["<Head><Script src={url} /></Head>  // ✗ Script 该放在页面组件里"]],
+"no-styled-jsx-in-document":["_document 里用了 styled-jsx","cor",["<style jsx>{`...`}</style>  // ✗ _document 不支持 styled-jsx"]],
+"no-sync-scripts":["script 没有 async 或 defer","cor",["<script src={url}><\/script>  // ✗ 会阻塞解析，该加 defer"]],
+"no-title-in-document-head":["_document 里写了 title","cor",["<Head><title>x</title></Head>  // ✗ _document 里不该写 title，该在页面里写"]],
+"no-typos":["拼错了 Next.js 的导出名","cor",["import { useRouterr } from 'next/router';  // ✗ 拼错了，应该是 useRouter"]],
+"no-unwanted-polyfillio":["重复引入 polyfill.io 的 polyfill","cor",["<script src=\"https://polyfill.io/v3/polyfill.min.js?features=fetch\" />  // ✗ Next 已经内置，重复引入"]],
+"hoisted-apis-on-top":["vi.hoisted 没有放在模块顶部","cor",["describe('x', () => {","  const m = vi.hoisted(() => ({}));  // ✗ vi.hoisted 必须提到模块顶层","});"]],
+"no-conditional-tests":["测试里写了条件分支","cor",["it('x', () => {","  if (a) { expect(x).toBe(1); }  // ✗ 测试不该有分支","});"]],
+"require-awaited-expect-poll":["expect.poll 没有 await","cor",["expect.poll(() => getValue()).toBe(1);  // ✗ 少了 await，断言根本不会执行"]],
+"require-local-test-context-for-concurrent-snapshots":["并发测试的快照没传 context","cor",["test.concurrent('x', () => {","  expect(v).toMatchSnapshot();  // ✗ 并发测试必须传入 context 参数","});"]],
+"require-mock-type-parameters":["vi.fn 缺少类型参数","cor",["const fn = vi.fn();  // ✗ 该写 vi.fn<(x: number) => string>()"]],
+"warn-todo":["用了 test.todo","cor",["test.todo('待实现');  // ✗ 待办测试很容易被永久遗忘，该提 issue"]],
+"require-test-timeout":["测试没有设置超时","res",["it('x', async () => { await slow(); });  // ✗ 该显式设 timeout，否则挂住要等默认 5 秒"]],
+"consistent-each-for":["each 和 for 两种写法混用","sty",["it.each([1])(() => {});","it.for([2])(() => {});  // ✗ 统一用 each"]],
+"consistent-test-filename":["测试文件名不符合约定","sty",["// test/user.ts  // ✗ 团队约定测试文件用 user.test.ts"]],
+"consistent-vitest-vi":["vi 和 vitest 混用","sty",["import { vi, vitest } from 'vitest';  // ✗ 统一用 vi"]],
+"no-import-node-test":["从 node:test 导入测试 API","sty",["import { test } from 'node:test';  // ✗ 该用 vitest"]],
+"no-importing-vitest-globals":["显式导入了全局 API","sty",["import { describe, it } from 'vitest';  // ✗ 已配置全局后不该再导入"]],
+"no-restricted-vi-methods":["用了被禁用的 vi 方法","sty",["vi.mock('./api');  // ✗ 团队禁用自动 mock，要求显式传工厂函数"]],
+"prefer-called-exactly-once-with":["断言调用时没限定次数","sty",["expect(fn).toHaveBeenCalledWith(1);  // ✗ 该用 toHaveBeenCalledExactlyOnceWith(1)"]],
+"prefer-called-once":["用 times(1) 表示调用一次","sty",["expect(fn).toHaveBeenCalledTimes(1);  // ✗ 该用 toHaveBeenCalledOnce()"]],
+"prefer-called-times":["用了 toBeCalledTimes 别名","sty",["expect(fn).toBeCalledTimes(2);  // ✗ 该用 toHaveBeenCalledTimes(2)"]],
+"prefer-describe-function-title":["describe 标题不是被测函数名","sty",["describe('测试用户模块', () => {});  // ✗ 团队约定用 describe('getUser')"]],
+"prefer-expect-type-of":["用 typeof 判断类型","sty",["expect(typeof x).toBe('string');  // ✗ 该用 expect(x).toBeTypeOf('string')"]],
+"prefer-import-in-mock":["mock 工厂里用了 require","sty",["vi.mock('./api', () => ({ get: require('./api').get }));  // ✗ 该用 await import('./api')"]],
+"prefer-importing-vitest-globals":["直接用全局 API 但没开配置","sty",["describe('x', () => {});  // ✗ 没开 globals 配置时该显式 import"]],
+"prefer-strict-boolean-matchers":["用真值断言代替显式布尔比较","sty",["expect(flag).toBeTruthy();  // ✗ 团队要求显式断言 toBe(true)"]],
+"prefer-to-be-falsy":["用 toBe(false) 判断假值","sty",["expect(flag).toBe(false);  // ✗ 该用 toBeFalsy()"]],
+"prefer-to-be-object":["用 typeof 判断对象","sty",["expect(typeof x).toBe('object');  // ✗ 该用 expect(x).toBeObject()"]],
+"prefer-to-be-truthy":["用 toBe(true) 判断真值","sty",["expect(flag).toBe(true);  // ✗ 该用 toBeTruthy()"]],
+"class-methods-use-this":["方法里没用到 this","res",["class A {","  calc(x) { return x * 2; }  // ✗ 没用到 this，该提成普通函数","}"]],
+"complexity":["函数的分支太多，圈复杂度超标","res",["function f(a) { if (a) { if (b) { if (c) { if (d) { } } } } }  // ✗ 分支太多，该拆分"]],
+"default-case":["switch 缺少 default 分支","res",["switch (x) { case 1: break; }  // ✗ 缺少 default，将来新增枚举值会静默什么都不做"]],
+"no-alert":["用了 alert / confirm","res",["alert('保存成功');  // ✗ 阻塞主线程且样式不可控，该用页面内提示"]],
+"no-bitwise":["用了位运算","res",["const flag = a | b;  // ✗ 团队禁用位运算，可读性太差"]],
+"no-console":["代码里留了 console","res",["console.log(data);  // ✗ 生产代码不该有调试输出"]],
+"no-div-regex":["正则开头看起来像除号","res",["const re = /=foo/;  // ✗ 视觉上像除号，容易被误读，该写 /[=]foo/"]],
+"no-empty":["空的代码块","res",["if (ok) { }  // ✗ 空块，多半是漏写了逻辑"]],
+"no-empty-function":["空函数","res",["function noop() { }  // ✗ 空函数容易掩盖「还没实现」"]],
+"no-eq-null":["用 == null 判断","res",["if (x == null) { }  // ✗ 同时匹配 null 和 undefined，意图不明确，该分开写"]],
+"no-implicit-globals":["在全局作用域声明变量","res",["var counter = 0;  // ✗ 脚本里会挂到 window 上，污染全局"]],
+"no-param-reassign":["修改了函数参数","res",["function f(opts) { opts.x = 1; }  // ✗ 改的是调用方传进来的对象"]],
+"no-plusplus":["用了 ++ 或 --","res",["i++;  // ✗ 团队约定写 i += 1"]],
+"no-proto":["用了 __proto__","res",["obj.__proto__;  // ✗ 已废弃，该用 Object.getPrototypeOf(obj)"]],
+"no-regex-spaces":["正则里连写了多个空格","res",["const re = /a   b/;  // ✗ 数不清几个空格，该写 /a {3}b/"]],
+"no-restricted-globals":["用了被禁用的全局变量","res",["event.preventDefault();  // ✗ event 是隐式全局，该从函数参数取"]],
+"no-restricted-imports":["引入了被禁用的模块","res",["import _ from 'lodash';  // ✗ 团队禁用整包引入，要求按需导入"]],
+"no-restricted-properties":["用了被禁用的属性","res",["obj.__defineGetter__('x', fn);  // ✗ 已废弃，该用 Object.defineProperty"]],
+"no-sequences":["用了逗号运算符","res",["const x = (a++, b);  // ✗ 结果只取最后一个，非常容易看错"]],
+"no-undefined":["直接使用了 undefined","res",["const x = undefined;  // ✗ 团队约定用 void 0 或干脆不赋值"]],
+"no-use-before-define":["在声明之前就使用了","res",["run();","function run() {}  // ✗ 靠提升能跑通，但阅读顺序反了"]],
+"no-var":["用了 var","res",["var x = 1;  // ✗ 该用 let 或 const"]],
+"no-void":["用了 void 运算符","res",["void doSomething();  // ✗ 团队禁用 void"]],
+"unicode-bom":["文件开头有 BOM","res",["// 文件开头藏着一个看不见的 BOM  // ✗ 会导致解析异常"]],
+"accessor-pairs":["只有 getter 没有 setter","ped",["class A {","  get x() { return this._x; }  // ✗ 如果确实只读要说明，否则该配一个 setter","}"]],
+"array-callback-return":["数组方法的回调没有返回值","ped",["[1, 2].map((x) => { x * 2; });  // ✗ 没 return，得到 [undefined, undefined]"]],
+"eqeqeq":["用了 == 而不是 ===","ped",["if (a == b) { }  // ✗ 该用 ===，避免隐式类型转换"]],
+"max-classes-per-file":["一个文件里定义了多个类","ped",["class A {}","class B {}  // ✗ 一个文件只放一个类"]],
+"max-depth":["代码嵌套层数太深","ped",["if (a) { if (b) { if (c) { if (d) { } } } }  // ✗ 嵌套超过上限，该提前 return"]],
+"max-lines":["文件行数太多","ped",["// 这个文件有 800 行  // ✗ 超过行数上限，该按职责拆分"]],
+"max-lines-per-function":["函数太长","ped",["function big() { /* 两百行 */ }  // ✗ 超过上限，该拆成小函数"]],
+"max-nested-callbacks":["回调嵌套太深","ped",["a(() => { b(() => { c(() => { d(() => {}); }); }); });  // ✗ 回调地狱，该改成 async/await"]],
+"no-array-constructor":["用 new Array 创建数组","ped",["new Array(1, 2, 3);  // ✗ 该直接写 [1, 2, 3]"]],
+"no-case-declarations":["case 里直接声明了变量","ped",["switch (x) {","  case 1:","    const a = 1;  // ✗ 该用大括号包住，否则会泄漏到整个 switch","    break;","}"]],
+"no-constructor-return":["构造函数里写了 return","ped",["class A {","  constructor() { return {}; }  // ✗ 返回对象会直接替换掉实例","}"]],
+"no-else-return":["return 之后还写了 else","ped",["function f() {","  if (a) { return 1; } else { return 2; }  // ✗ else 是多余的","}"]],
+"no-fallthrough":["switch 里漏了 break","ped",["switch (x) {","  case 1:","    doA();","  case 2:  // ✗ 会继续往下执行 case 2","    doB();","}"]],
+"no-inline-comments":["在代码行尾写注释","ped",["const x = 1;  // 行尾注释  // ✗ 团队约定注释单独占一行"]],
+"no-inner-declarations":["在代码块里声明函数","ped",["if (ok) {","  function helper() { }  // ✗ 该提到外层作用域","}"]],
+"no-lonely-if":["else 里只包了一个 if","ped",["if (a) { } else { if (b) { } }  // ✗ 该合并成 else if"]],
+"no-loop-func":["循环里创建闭包引用循环变量","ped",["for (var i = 0; i < 3; i++) {","  setTimeout(() => console.log(i));  // ✗ 三个回调打印的都是 3","}"]],
+"no-negated-condition":["用取反作为条件","ped",["if (!ok) { } else { }  // ✗ 把两个分支对调，去掉取反更好读"]],
+"no-new-wrappers":["用 new 创建包装对象","ped",["const s = new String('x');  // ✗ 得到的是对象不是原始值，该直接写 'x'"]],
+"no-object-constructor":["用 Object() 创建对象","ped",["const o = new Object();  // ✗ 该写 {}"]],
+"no-promise-executor-return":["Promise executor 里 return 了值","ped",["new Promise((resolve) => { return resolve(1); });  // ✗ executor 的返回值会被忽略"]],
+"no-prototype-builtins":["直接调用 hasOwnProperty","ped",["obj.hasOwnProperty('k');  // ✗ 对象可能覆盖这个方法，该用 Object.hasOwn(obj, 'k')"]],
+"no-redeclare":["重复声明了同一个变量","ped",["let x = 1;","let x = 2;  // ✗ 重复声明，后者会覆盖前者"]],
+"no-self-compare":["拿变量和自己比较","ped",["if (x === x) { }  // ✗ 只有 NaN 时为假，几乎肯定是写错了"]],
+"no-throw-literal":["throw 了字符串字面量","ped",["throw '出错了';  // ✗ 该 throw new Error，否则没有堆栈信息"]],
+"no-useless-return":["函数末尾多余的 return","ped",["function f() {","  doSomething();","  return;  // ✗ 末尾的 return 没有任何作用","}"]],
+"no-warning-comments":["代码里留着 TODO 或 FIXME","ped",["// FIXME: 这里有时序问题  // ✗ 提交前该处理掉"]],
+"prefer-promise-reject-errors":["reject 了非 Error 的值","ped",["new Promise((_, reject) => reject('失败'));  // ✗ 该 reject(new Error('失败'))"]],
+"radix":["parseInt 没有传进制","ped",["parseInt('08');  // ✗ 该显式写 parseInt('08', 10)"]],
+"require-await":["async 函数里没有 await","ped",["async function f() { return 1; }  // ✗ 没有 await 就不该标 async"]],
+"require-unicode-regexp":["正则没有加 u 标志","ped",["const re = /^\\w+$/;  // ✗ 该加 u，否则 emoji 等多字节字符处理不对"]],
+"sort-vars":["同一个声明里的变量没有排序","ped",["let b = 1, a = 2;  // ✗ 按字母序该是 a 在前"]],
+"symbol-description":["Symbol 没有写描述","ped",["const s = Symbol();  // ✗ 调试时完全看不出这个 Symbol 是干什么的"]],
+"no-arrow-functions-in-watch":["watch 里用了箭头函数","cor",["watch: {","  id: () => { this.load(); }  // ✗ 箭头函数拿不到组件实例的 this","}"]],
+"no-async-in-computed-properties":["computed 里用了 async","cor",["computed: {","  async total() { return await calc(); }  // ✗ computed 必须是同步的","}"]],
+"no-computed-properties-in-data":["把 computed 写进了 data","cor",["data() {","  return { total: 0 };  // ✗ total 是 computed，不该出现在 data 里","}"]],
+"no-deprecated-data-object-declaration":["data 写成了对象而不是函数","cor",["data: { count: 0 }  // ✗ 所有组件实例会共享同一个对象，必须写成函数"]],
+"no-deprecated-delete-set":["用了 $set 或 $delete","cor",["this.$set(obj, 'k', 1);  // ✗ Vue 3 里直接写 obj.k = 1"]],
+"no-deprecated-destroyed-lifecycle":["用了已废弃的 destroyed 钩子","cor",["destroyed() { }  // ✗ Vue 3 改成了 unmounted"]],
+"no-deprecated-events-api":["用了 $on / $off 事件 API","cor",["this.$on('change', fn);  // ✗ 事件 API 已移除，该用 props 或状态管理"]],
+"no-deprecated-model-definition":["model 选项写法过时","cor",["model: { prop: 'value', event: 'input' }  // ✗ Vue 3 该用 v-model 参数"]],
+"no-deprecated-props-default-this":["props 默认值里用了 this","cor",["props: { a: { default() { return this.b; } } }  // ✗ 此时 this 还没初始化"]],
+"no-deprecated-vue-config-keycodes":["用了 Vue.config.keyCodes","cor",["Vue.config.keyCodes.f1 = 112;  // ✗ 已移除，该用 kebab-case 键名"]],
+"no-export-in-script-setup":["script setup 里写了导出","cor",["<script setup>","export const a = 1;  // ✗ script setup 不能有 export","<\\/script>"]],
+"no-expose-after-await":["在 await 之后调用 expose","cor",["await init();","expose({ a });  // ✗ expose 必须在 await 之前同步调用"]],
+"no-lifecycle-after-await":["在 await 之后注册生命周期钩子","cor",["await init();","onMounted(() => {});  // ✗ 此时组件可能已经挂载完，钩子不会执行"]],
+"no-reserved-component-names":["组件名用了保留字","cor",["export default { name: 'div' };  // ✗ div 是保留标签名"]],
+"no-reserved-keys":["data 里用了保留 key","cor",["data() { return { $el: 1 }; }  // ✗ $ 开头是框架内部属性"]],
+"no-reserved-props":["prop 名用了保留字","cor",["props: ['key']  // ✗ key 是保留 prop"]],
+"no-shared-component-data":["data 返回了外部共享对象","cor",["const state = { n: 0 };","export default { data() { return state; } }  // ✗ 所有实例共享同一个对象"]],
+"no-side-effects-in-computed-properties":["computed 里产生了副作用","cor",["computed: {","  total() { this.count++; return this.count; }  // ✗ computed 必须是纯的","}"]],
+"no-this-in-before-route-enter":["beforeRouteEnter 里用了 this","cor",["beforeRouteEnter() { this.load(); }  // ✗ 此时组件实例还没创建"]],
+"no-watch-after-await":["在 await 之后注册 watch","cor",["await init();","watch(id, fn);  // ✗ 该在 await 之前注册，否则会漏掉变化"]],
+"prefer-import-from-vue":["从错误的包导入 Vue API","cor",["import { ref } from '@vue/composition-api';  // ✗ 该从 vue 导入"]],
+"require-prop-type-constructor":["prop 类型写成了字符串","cor",["props: { age: 'String' }  // ✗ 该写 String 构造函数"]],
+"require-render-return":["render 没有返回值","cor",["render() { h('div'); }  // ✗ 没有 return，渲染结果是空的"]],
+"require-slots-as-functions":["把 $slots 当对象取值","cor",["this.$slots.default;  // ✗ 该当函数调用 this.$slots.default()"]],
+"return-in-computed-property":["computed 有分支没返回值","cor",["computed: {","  total() { if (ok) { return 1; } }  // ✗ 另一条路径没有返回值","}"]],
+"return-in-emits-validator":["emits 校验函数没有返回值","cor",["emits: { change: (v) => { v > 0; } }  // ✗ 没有 return，校验永远不通过"]],
+"valid-define-emits":["defineEmits 用法不合法","cor",["const emit = defineEmits(['change']);  // ✗ 运行时数组和类型声明不能混用"]],
+"valid-define-options":["defineOptions 用法不合法","cor",["defineOptions({ name: 'A', props: {} });  // ✗ defineOptions 里不该写 props"]],
+"valid-define-props":["defineProps 用法不合法","cor",["const props = defineProps(['a']);  // ✗ 运行时数组和类型声明不能混用"]],
+"valid-next-tick":["nextTick 用法不合法","cor",["nextTick(fn);  // ✗ 该用 await nextTick()"]],
+"max-props":["组件的 props 太多","res",["props: ['a', 'b', 'c', 'd', 'e', 'f']  // ✗ 超过上限，说明这个组件该拆了"]],
+"no-import-compiler-macros":["手动导入了编译器宏","res",["import { defineProps } from 'vue';  // ✗ 编译器宏不需要导入"]],
+"no-multiple-slot-args":["插槽传了多个参数","res",["<slot :a=\"1\" :b=\"2\" />  // ✗ 该合并成一个对象传过去"]],
+"component-definition-name-casing":["组件 name 不是 PascalCase","sty",["export default { name: 'user-card' };  // ✗ 该写 UserCard"]],
+"define-emits-declaration":["defineEmits 声明风格不统一","sty",["const emit = defineEmits(['change']);  // ✗ 团队约定统一用类型声明"]],
+"define-props-declaration":["defineProps 声明风格不统一","sty",["const props = defineProps(['a']);  // ✗ 团队约定统一用类型声明"]],
+"define-props-destructuring":["解构了 defineProps 的返回值","sty",["const { name } = defineProps(['name']);  // ✗ 解构会丢失响应性，该用 props.name"]],
+"next-tick-style":["nextTick 风格不统一","sty",["nextTick(() => {});  // ✗ 团队约定统一用 await nextTick()"]],
+"prop-name-casing":["prop 名不是 camelCase","sty",["props: ['user_name']  // ✗ 该写 userName"]],
+"require-default-prop":["可选 prop 没有默认值","sty",["props: { size: String }  // ✗ 非必填 prop 该给默认值"]],
+"require-direct-export":["先定义变量再导出","sty",["const App = { name: 'App' };","export default App;  // ✗ 团队约定直接写 export default { ... }"]],
+"require-prop-types":["prop 没有声明类型","sty",["props: ['name']  // ✗ 缺少类型声明"]],
+"require-typed-ref":["ref 没有写类型","sty",["const count = ref();  // ✗ 该写 ref<number>(0)"]],
+/* MORE_END */
+};
+for (const [k, v] of Object.entries(MORE)) {
+  ZH[k] = [v[0], v[1]];
+  if (v[2]) EX[k] = v[2];
+}
+
+
+const PLUGIN_LABEL = {"eslint":"eslint","typescript":"ts","oxc":"oxc","unicorn":"unicorn","import":"import","react":"react","jest":"jest","vitest":"vitest","jsdoc":"jsdoc","jsx_a11y":"a11y","nextjs":"next","react_perf":"react-perf","promise":"promise","node":"node","vue":"vue"};
+
+const RULES = (() => {
+  const map = new Map();
+  for (const s of RAW.split(";")) {
+    const [n,p,c,d,f] = s.split("~");
+    const hit = map.get(n);
+    if (!hit) {
+      map.set(n, {n, p, c, d:d==="1", f:f==="1", p2:null});
+    } else {
+      if (d === "1") hit.d = true;
+      if (f === "1") hit.f = true;
+      if (hit.p !== p) hit.p2 = hit.p2 || p;
+    }
+  }
+  return [...map.values()];
+})();
+const CATNAME = Object.fromEntries(CATS.map(c => [c[0], c[1]]));
+
+const elList = document.getElementById("list");
+const elCats = document.getElementById("cats");
+const elQ = document.getElementById("q");
+const elDef = document.getElementById("onlyDefault");
+const elFix = document.getElementById("onlyFix");
+const elCount = document.getElementById("count");
+let activeCat = null;
+
+function renderCats(){
+  elCats.innerHTML = CATS.map(([code,name,short,long]) => {
+    const total = RULES.filter(r => r.c === code).length;
+    const on = RULES.filter(r => r.c === code && r.d).length;
+    const meta = on ? `${total} 条 · 默认 ${on}` : `${total} 条 · 默认 0`;
+    return `<button class="cat" data-cat="${code}" aria-pressed="${activeCat===code}">
+      <div class="ct"><span class="cn">${name}</span><span class="cd">${meta}</span></div>
+      <div class="cx">${short}</div>
+    </button>`;
+  }).join("");
+}
+
+const esc = s => s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+let showEx = true;
+
+function rowHTML(r){
+  const zh = ZH[r.n];
+  const title = zh ? zh[0] : r.n;
+  const cls = zh ? "row" : "row raw";
+  const chips = [
+    `<code>${r.n}</code>`,
+    `<span class="chip">${PLUGIN_LABEL[r.p] || r.p}${r.p2 ? " · " + (PLUGIN_LABEL[r.p2] || r.p2) : ""}</span>`,
+    r.d ? `<span class="chip def">默认开启</span>` : "",
+    r.f ? `<span class="chip fix">可自动修复</span>` : ""
+  ].join("");
+  let code = "";
+  const lines = EX[r.n];
+  if (lines && showEx) {
+    const txt = esc(lines.join("\n")).replace(/(\/\/ ✗[^\n]*)/g, '<span class="bad">$1</span>');
+    code = `<pre class="ex">${txt}</pre>`;
+  }
+  return `<div class="${cls}"><div class="zh">${title}</div><div class="meta">${chips}</div>${code}</div>`;
+}
+
+function render(){
+  const q = elQ.value.trim().toLowerCase();
+  const onlyDef = elDef.checked;
+  const onlyFix = elFix.checked;
+
+  let rows = RULES.filter(r => {
+    if (activeCat && r.c !== activeCat) return false;
+    if (onlyDef && !r.d) return false;
+    if (onlyFix && !r.f) return false;
+    if (!q) return true;
+    const zh = ZH[r.n];
+    const plug = r.p + (r.p2 ? " " + r.p2 : "");
+    return r.n.toLowerCase().includes(q)
+      || (zh && zh[0].toLowerCase().includes(q))
+      || plug.toLowerCase().includes(q);
+  });
+
+  elCount.textContent = `显示 ${rows.length} / ${RULES.length} 条`;
+  document.getElementById("fCovered").textContent = RULES.filter(r => EX[r.n]).length;
+  if (!rows.length){
+    elList.innerHTML = `<div class="empty">没有匹配的规则。试试清掉搜索词，或者取消「只看默认开启」。</div>`;
+    return;
+  }
+
+  if (onlyDef){
+    let html = "";
+    for (const [key, title, desc] of SCENES){
+      const group = rows.filter(r => (ZH[r.n]?.[1] || "misc") === key);
+      if (!group.length) continue;
+      html += `<section class="scene"><h2>${title}<span class="n">${group.length} 条</span></h2><p>${desc}</p></section>`;
+      html += group.map(r => rowHTML(r)).join("");
+    }
+    elList.innerHTML = html;
+  } else {
+    let html = "";
+    for (const [code, name] of CATS){
+      const group = rows.filter(r => r.c === code);
+      if (!group.length) continue;
+      const known = group.filter(r => ZH[r.n]).length;
+      html += `<section class="scene"><h2>${name}<span class="n">${group.length} 条${known ? ` · ${known} 条有中文说明` : ""}</span></h2></section>`;
+      html += group.map(r => rowHTML(r)).join("");
+    }
+    elList.innerHTML = html;
+  }
+}
+
+elCats.addEventListener("click", e => {
+  const btn = e.target.closest(".cat");
+  if (!btn) return;
+  activeCat = activeCat === btn.dataset.cat ? null : btn.dataset.cat;
+  renderCats();
+  render();
+});
+elQ.addEventListener("input", render);
+elDef.addEventListener("change", render);
+elFix.addEventListener("change", render);
+document.getElementById("showEx").addEventListener("change", e => {
+  showEx = e.target.checked;
+  render();
+});
+
+renderCats();
+render();
+</script>
+</body>
+</html>

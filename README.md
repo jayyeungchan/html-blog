@@ -19,7 +19,7 @@
 ├── 404.html                  # 404 页
 ├── build.js                  # 构建：扫描目录 → 生成 articles.json / sitemap.xml
 ├── server.js                 # 本地预览服务器（仅开发用）
-├── site.config.json          # 站点配置（名称、作者、GitHub 同步）
+├── site.config.json          # 站点配置（站点 URL、作者、GitHub 同步）
 ├── render.yaml               # Render Blueprint
 ├── articles.json             # 构建产物：全站索引
 ├── sitemap.xml               # 构建产物：站点地图
@@ -28,21 +28,21 @@
 │   ├── js/theme.js           # 深浅色（提前执行，避免闪白）
 │   ├── js/home.js            # 首页逻辑
 │   ├── js/article.js         # 文章页逻辑
-│   └── img/favicon.svg
+│   ├── img/favicon.svg
+│   ├── img/posters/          # 文章配图：10 张豆瓣海报
+│   └── tools/
+│       └── oxlint-rules-map.html   # 附页：oxlint 规则地图（不参与扫描，首页页脚与文章里链入）
 ├── _templates/article.html   # 新文章模板（下划线开头，不参与扫描）
 ├── 技术/
-│   ├── 为什么这个博客不用框架.html
-│   ├── 静态博客是怎么跑起来的.html
-│   └── 用Grid写响应式卡片墙.html
-├── 生活/
-│   └── 我的2026阅读清单.html
+│   └── oxlint 规则地图.html
 └── 随笔/
-    └── 关于慢下来.html
+    └── 我的2026中国影视前十.html
 ```
 
-**分类 = 一级目录名。** 想加「读书笔记」分类，新建一个 `读书笔记/` 文件夹即可。
+**分类 = 一级目录名。** 目前是 `技术/` 和 `随笔/` 各 1 篇；想加「读书笔记」分类，新建一个 `读书笔记/` 文件夹放 HTML 即可。
 
-> 以 `_` 或 `.` 开头的文件和目录会被跳过，`assets/` 也在跳过名单里（见 `site.config.json` 的 `exclude`）。
+> 以 `_` 或 `.` 开头的文件和目录会被跳过，`assets/` 也在跳过名单里（见 `site.config.json` 的 `exclude`），
+> 所以 `assets/tools/` 下的独立页面只是被链接的「附页」，不会进文章列表。
 
 ---
 
@@ -118,14 +118,14 @@ npm run dev          # 构建 + 启动 http://127.0.0.1:5173
 **第一层：Render 自动部署（默认开启）**
 `render.yaml` 里的 `autoDeployTrigger: commit` 意味着 push 之后 Render 自动拉代码、跑 `node build.js`、发布新版本。你不需要点任何按钮——这已经满足「不用手动部署」。
 
-**第二层：前端直读 GitHub（可选，秒级生效）**
-如果希望新文件在 Render 构建完成前就先出现在列表里，打开 `site.config.json`：
+**第二层：前端直读 GitHub（已开启）**
+如果希望新文件在 Render 构建完成前就先出现在列表里，`site.config.json` 里的这一段需要是开着的：
 
 ```json
 "github": {
   "enabled": true,
-  "owner": "你的 GitHub 用户名",
-  "repo": "仓库名",
+  "owner": "jayyeungchan",
+  "repo": "html-blog",
   "branch": "main"
 }
 ```
@@ -140,6 +140,7 @@ npm run dev          # 构建 + 启动 http://127.0.0.1:5173
 | 想改什么 | 改哪里 |
 | --- | --- |
 | 站名、副标题、作者 | `site.config.json` → `title` / `description` / `author` |
+| 站点地址（`sitemap.xml` 用） | `site.config.json` → `url`，换域名时记得改 |
 | 主题色、字体、圆角 | `assets/css/site.css` 顶部 `:root` 里的 CSS 变量 |
 | 深色模式配色 | 同文件 `[data-theme="dark"]` 区块 |
 | 首页文案 | `index.html` 的 `.hero` 区块 |
