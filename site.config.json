@@ -2,7 +2,7 @@
   "title": "字里行间",
   "description": "史书翻到第几页，代码就写到第几行。剩下的念头没处安放，就散在字里行间。",
   "author": "Kit",
-  "url": "https://html-blog.onrender.com",
+  "url": "https://your-blog.onrender.com",
   "contentRoot": ".",
   "exclude": [
     "index.html",
